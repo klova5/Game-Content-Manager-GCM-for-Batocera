@@ -1,0 +1,92 @@
+#!/bin/bash
+set -u
+
+ROOT=/userdata/system/add-ons/game-content-manager/v36-permanent
+SUP="$ROOT/gcm-v36-permanent-supervisor.py"
+BOOT="$ROOT/gcm-v36-boot-wait.py"
+LOG=/userdata/system/logs/gcm-v36-boot.log
+PIDFILE=/run/gcm-v36-service-boot.pid
+CANCEL=/run/gcm-v36-service.cancel
+
+case "${1:-}" in
+    start)
+        if [ -f "$PIDFILE" ]; then
+            PID="$(cat "$PIDFILE" 2>/dev/null)"
+            if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+                if tr '\0' '\n' < "/proc/$PID/cmdline" 2>/dev/null |
+                   grep -Fxq "$BOOT"; then
+                    echo "GCMV36 startup worker already running"
+                    exit 0
+                fi
+            fi
+        fi
+
+        rm -f "$CANCEL"
+        mkdir -p /userdata/system/logs
+
+        nohup python3 -u "$BOOT" >>"$LOG" 2>&1 </dev/null &
+        echo "$!" > "$PIDFILE"
+
+        echo "GCMV36 startup worker launched"
+        ;;
+
+    stop)
+        touch "$CANCEL"
+        touch "/run/gcm-v36-permanent-shutdown.marker"
+
+        python3 - "$SUP" <<'PYSTOP'
+import json
+import os
+import signal
+import sys
+from pathlib import Path
+
+supervisor = os.fsencode(str(Path(sys.argv[1]).resolve()))
+state = Path("/run/gcm-v36-permanent.json")
+
+try:
+    data = json.loads(state.read_text())
+    pid = int(data.get("supervisor_pid") or 0)
+
+    if pid > 1:
+        args = Path(f"/proc/{pid}/cmdline").read_bytes().split(bytes([0]))
+
+        if supervisor in args and b"supervise" in args:
+            os.kill(pid, signal.SIGTERM)
+            print("Shutdown-safe supervisor stop requested")
+        else:
+            print("Supervisor PID mismatch; not sending signal")
+except (OSError, ValueError, TypeError) as exc:
+    print("Supervisor unavailable:", exc)
+PYSTOP
+        ;;
+
+    status)
+        echo "===== GCMV36 PERMANENT FRONTEND ====="
+        python3 "$SUP" status
+        echo "===== STARTUP LOG ====="
+        if [ -f "$LOG" ]; then
+            tail -12 "$LOG"
+        fi
+        ;;
+
+    restore)
+        touch "$CANCEL"
+        rm -f "/run/gcm-v36-permanent-shutdown.marker"
+        python3 "$SUP" stop
+        echo "Manual v3.4 restoration requested"
+        ;;
+
+    restart)
+        "$0" restore
+        sleep 3
+        "$0" start
+        ;;
+
+    *)
+        echo "Usage: $0 {start|stop|restore|status|restart}"
+        exit 1
+        ;;
+esac
+
+exit 0

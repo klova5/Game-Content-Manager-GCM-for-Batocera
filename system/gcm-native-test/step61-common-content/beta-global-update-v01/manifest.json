@@ -1,0 +1,8 @@
+{
+  "sha256": {
+    "gcm-global-update-workflow-v01.py": "dd7dedef3dd55ec6a941f96cf518acc28a2375717bdd7885bcdc5bfe6a606593",
+    "gcm-global-update-jobs-v01.py": "abe7556525f6af8d06cdadcef8e08c8fc9de8c12c5af455cc20f947a9e2404f0",
+    "gcm-global-update-remove-v01.py": "8796df7087b62c3c22f541ea1bb473b684c89010527e15704fdb585b511de6c4",
+    "gcm-update-profiles-v01.py": "5809fee6b9c3622456c65f62ab784da7c2e2c6a3a932775e7cd03ae5626f31f4"
+  }
+}

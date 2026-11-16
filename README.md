@@ -1,0 +1,90 @@
+# GCM – Game Content Manager for Batocera (v3.6 developer preview)
+
+GCM adds a **Game Content Manager** to Batocera's game menu (Advanced Game Options). It finds,
+verifies, installs, enables and uninstalls **updates and DLC** for each game, from your internal
+storage and external drives, without touching your original files.
+
+> **Developer preview.** This is the code as it runs on the author's machine, packaged so others can
+> try it and read it. Expect rough edges, and keep backups of anything you care about.
+
+## Supported
+
+| | |
+|---|---|
+| Batocera | **44**, x86_64 |
+| Nintendo Switch | Ryujinx, Citron (updates and DLC) |
+| PlayStation 4 | shadPS4 (updates and DLC) |
+| Other systems | RPCS3, Cemu, Vita3K and others: update management (varies by system) |
+
+## What it does
+
+- **Detected / Available lists** per game: content found on your drives, and content GCM has verified.
+- **Verify** checks each package's integrity once; unchanged files are never read again (proof reuse).
+- **Install / Enable / Apply Changes** registers verified content with the emulator.
+- **Uninstall** removes the content from the emulator and deletes GCM's own copies; your original
+  packages on internal and external drives are never deleted. Uninstalled items return to Detected.
+- **Copy to GCM** keeps a GCM-managed copy of a Switch update or DLC (optional; Switch registers in place).
+- Works with exFAT/FAT external drives (stable file identity even though those drives have no file numbers).
+
+## Install
+
+Download `gcm-v3.6-preview-batocera44-x86_64.zip` from this repository's
+[Releases](https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera/releases), copy it to
+`/userdata/system` on the Batocera device, then from Batocera's terminal (or an SSH session on the device):
+
+```bash
+cd /userdata/system
+unzip gcm-v3.6-preview-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v3.6-preview-batocera44-x86_64.zip .
+cd gcm-v3.6-preview
+bash install.sh --check     # only checks the device; writes nothing
+bash install.sh --start     # installs and switches to GCM v3.6 (and at every boot)
+```
+
+`bash install.sh` without `--start` installs without switching; it prints the command to switch later.
+
+## Switching frontends
+
+GCM runs as its own build of Batocera's EmulationStation. The standard frontend stays installed.
+
+```bash
+python3 /userdata/system/add-ons/game-content-manager/v36-permanent/gcm-frontend-switch.py v36   # GCM
+python3 /userdata/system/add-ons/game-content-manager/v36-permanent/gcm-frontend-switch.py v34   # standard
+python3 /userdata/system/add-ons/game-content-manager/v36-permanent/gcm-frontend-switch.py status
+```
+
+## Uninstall
+
+```bash
+bash uninstall.sh           # back to the standard frontend; removes GCM's program files
+bash uninstall.sh --purge   # also removes GCM's state and GCM-managed copies in /userdata/system/game-content
+```
+
+Games, saves and emulator settings are never removed.
+
+## Logs
+
+- `/userdata/system/logs/gcm-v36-debug.log` – errors caught in GCM menus, and crash details
+- `/userdata/system/logs/gcm-v36-permanent.log` – frontend supervisor
+- `/userdata/system/logs/gcm-uninstall-cleanup.log` – what uninstall cleanup deleted
+
+## Known limitations
+
+- Built for Batocera 44 x86_64 only; other versions are refused by the installer.
+- Folder names still carry development history (`/userdata/system/gcm-native-test/...`): hundreds of
+  files locate and verify each other by exact path and checksum, so they are kept as they are for now.
+- Citron loads every update/DLC file in its folders: an update or DLC that is *your own file* in one of
+  Citron's folders cannot be uninstalled from GCM (GCM never deletes originals); remove or move the file.
+
+## Repository layout
+
+| Folder | Contents |
+|---|---|
+| `system/` | The GCM tools exactly as installed under `/userdata/system` (Python; the menu calls them) |
+| `emulationstation/` | GCM's menu: `es-app/src/guis/GuiGcmNative.h`, compiled into Batocera's EmulationStation |
+| `installer/` | `install.sh`, `uninstall.sh` and `gcm_install.py`, as shipped in the release zip |
+
+The release zip also contains the prebuilt GCM frontend (Batocera EmulationStation with GCM's menu),
+built for Batocera 44 x86_64. See [NOTICE.md](NOTICE.md) for its licence.
+
+Tools find and verify each other by exact path and SHA-256: editing a file in `system/` makes the tools
+that pin it refuse to run until their pins are updated.
