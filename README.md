@@ -75,6 +75,12 @@ Games, saves and emulator settings are never removed.
 - Citron loads every update/DLC file in its folders: an update or DLC that is *your own file* in one of
   Citron's folders cannot be uninstalled from GCM (GCM never deletes originals); remove or move the file.
 
+## Licence
+
+GCM's own code is licensed under the **GNU General Public License v3.0** ([LICENSE](LICENSE)).
+The GCM frontend in the release zip is a build of Batocera's EmulationStation and keeps its own licence
+(see [NOTICE.md](NOTICE.md)).
+
 ## Repository layout
 
 | Folder | Contents |
