@@ -28,13 +28,13 @@ storage and external drives, without touching your original files.
 
 ## Install
 
-Download `gcm-v3.6-preview-batocera44-x86_64.zip` from this repository's
+Download `gcm-v3.6-preview-2-batocera44-x86_64.zip` from this repository's
 [Releases](https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera/releases), copy it to
 `/userdata/system` on the Batocera device, then from Batocera's terminal (or an SSH session on the device):
 
 ```bash
 cd /userdata/system
-unzip gcm-v3.6-preview-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v3.6-preview-batocera44-x86_64.zip .
+unzip gcm-v3.6-preview-2-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v3.6-preview-2-batocera44-x86_64.zip .
 cd gcm-v3.6-preview
 bash install.sh --check     # only checks the device; writes nothing
 bash install.sh --start     # installs and switches to GCM v3.6 (and at every boot)

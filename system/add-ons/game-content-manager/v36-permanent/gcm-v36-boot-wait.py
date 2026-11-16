@@ -3,6 +3,7 @@ import fcntl
 import hashlib
 import importlib.util
 import json
+import signal
 import subprocess
 import sys
 import time
@@ -15,7 +16,7 @@ CANCEL = Path("/run/gcm-v36-service.cancel")
 LOCK = Path("/run/gcm-v36-service-boot.lock")
 STATE = Path("/run/gcm-v36-permanent.json")
 
-EXPECTED = "242678c913b8baf42b46306f0e7ee9e13f0910766a11cbce0e3f8cc178c910fe"
+EXPECTED = "b9d747269d85d306db4caaaf380c37aa06110c4e85e300e97bded56e5c4f846a"
 
 def log(message):
     print("GCMV36:", message, flush=True)
@@ -52,7 +53,34 @@ def check():
         raise RuntimeError("Permanent supervisor missing")
     log("Permanent runtime checks passed")
 
+def trace_signals():
+    """61TG: record any signal sent to the boot worker (boot-time starts used to vanish silently)."""
+    def note(number, _frame):
+        log(f"Boot worker received signal {signal.Signals(number).name}")
+        if number == signal.SIGTERM:
+            sys.exit(1)
+    for number in (signal.SIGTERM, signal.SIGHUP, signal.SIGQUIT):
+        signal.signal(number, note)
+
+
+RETRY_PAUSE = 15
+WORKDIR = "/userdata"
+SUPERVISOR_LOG = Path("/userdata/system/logs/gcm-v36-permanent.log")
+
+
+def start_supervisor(attempt):
+    """Start the supervisor directly in its own session and return the process."""
+    with open(SUPERVISOR_LOG, "ab") as output:
+        child = subprocess.Popen(
+            [sys.executable, "-B", str(SUP), "supervise"],
+            cwd=WORKDIR, stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=output, start_new_session=True)
+    log(f"Supervisor started (attempt {attempt}, PID {child.pid})")
+    return child
+
+
 def main():
+    trace_signals()
     with LOCK.open("a+") as lock:
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -109,35 +137,35 @@ def main():
 
         log("Starting permanent GCM v3.6 supervisor")
 
-        result = subprocess.run(
-            [sys.executable, str(SUP), "start"],
-            capture_output=True, text=True,
-            timeout=20
-        )
-        log((result.stdout + result.stderr).strip())
-
-        if result.returncode:
-            return 1
-
-        for second in range(240):
-            if CANCEL.exists():
-                subprocess.run([sys.executable, str(SUP), "stop"])
-                return 0
-
-            data = current()
-            phase = data.get("phase")
-
-            if already_running():
-                log("PASS: GCM v3.6 persistent frontend running")
-                return 0
-
-            if phase in ("recovery_attention_required", "v34_restored"):
-                log("Frontend startup failed or recovered: " + phase)
+        # 61TG: start the supervisor directly (its own session), report how it ends, and retry
+        # when it stops before GCM is up (boot-time starts used to end without a trace).
+        for attempt in range(1, 4):
+            child = start_supervisor(attempt)
+            for second in range(240):
+                if CANCEL.exists():
+                    subprocess.run([sys.executable, str(SUP), "stop"])
+                    return 0
+                if already_running():
+                    log("PASS: GCM v3.6 persistent frontend running")
+                    return 0
+                phase = current().get("phase")
+                if phase in ("recovery_attention_required", "v34_restored"):
+                    log("Frontend startup failed or recovered: " + phase)
+                    return 1
+                code = child.poll()
+                if code is not None:
+                    reason = f"signal {signal.Signals(-code).name}" if code < 0 else f"exit code {code}"
+                    log(f"Supervisor stopped before GCM started ({reason})")
+                    break
+                time.sleep(1)
+            else:
+                log("Startup confirmation timed out; inspect supervisor status")
                 return 1
+            if CANCEL.exists():
+                return 0
+            time.sleep(RETRY_PAUSE)
 
-            time.sleep(1)
-
-        log("Startup confirmation timed out; inspect supervisor status")
+        log("Supervisor did not stay up after 3 attempts; the standard frontend stays")
         return 1
 
 if __name__ == "__main__":

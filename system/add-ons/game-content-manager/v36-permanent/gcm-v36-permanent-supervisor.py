@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Permanent, supervised GCM v3.6 frontend (derived from the v3.5 permanent supervisor)."""
 
+import faulthandler
 import fcntl
 import hashlib
 import json
@@ -26,7 +27,7 @@ FLAG = Path("/var/run/emulationstation-standalone")
 # No time limit for permanent deployment
 
 V34_SHA = "b36c766420752fc0530f17fef4bc52995328f863485fd4b2a90403558abf5cd3"
-V36_SHA = "242678c913b8baf42b46306f0e7ee9e13f0910766a11cbce0e3f8cc178c910fe"
+V36_SHA = "b9d747269d85d306db4caaaf380c37aa06110c4e85e300e97bded56e5c4f846a"
 
 
 def checksum(path):
@@ -140,23 +141,38 @@ def graphical_environment(pid):
     return environment
 
 
+def frontend_pids():
+    """The GCM frontend processes themselves (not anything they started)."""
+    target = str(BIN)
+    return [pid for pid, args in processes() if any(a == target for a in args)]
+
+
 def terminate_test_session(child):
+    # 61TG: stop only the GCM frontend and its dbus session wrapper. A reboot or power-off that
+    # the frontend started runs in the same process group and must be left to finish (killing the
+    # whole group stalled Batocera's reboot halfway).
     if child is None:
         return
-
-    try:
-        os.killpg(child.pid, signal.SIGTERM)
-    except ProcessLookupError:
-        return
-
+    targets = set(frontend_pids())
+    if child.poll() is None:
+        targets.add(child.pid)
+    for pid in targets:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
     try:
         child.wait(timeout=10)
     except subprocess.TimeoutExpired:
-        log("Test frontend did not exit; forcing test process group to stop")
-    try:
-        os.killpg(child.pid, signal.SIGKILL)
-    except ProcessLookupError:
-        pass
+        log("GCM frontend did not exit in 10 s; stopping it")
+    leftover = set(frontend_pids())
+    if child.poll() is None:
+        leftover.add(child.pid)
+    for pid in leftover:
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
 
 
 def restore(env, child):
@@ -216,6 +232,20 @@ def restore(env, child):
 def supervise():
     child = None
     env = None
+    # 61TG: always leave a trace: who started us, and why we stop (signal, crash or normal end).
+    log(f"Supervisor {os.getpid()} starting (parent {os.getppid()})")
+    try:
+        trace = LOG.open("a")
+        faulthandler.enable(file=trace, all_threads=True)
+    except OSError:
+        pass
+
+    def note_signal(number, _frame):
+        log(f"Supervisor received signal {signal.Signals(number).name}")
+        STOP.touch()
+
+    for number in (signal.SIGHUP, signal.SIGQUIT):
+        signal.signal(number, note_signal)
 
     with LOCK.open("a+") as lock:
         try:
@@ -388,8 +418,8 @@ def start():
             [sys.executable, str(Path(__file__).resolve()), "supervise"],
             cwd="/userdata",
             stdin=subprocess.DEVNULL,
-            stdout=output,
-            stderr=subprocess.STDOUT,
+            stdout=subprocess.DEVNULL,
+            stderr=output,
             start_new_session=True,
         )
 
@@ -431,7 +461,13 @@ if __name__ == "__main__":
     if action == "start":
         start()
     elif action == "supervise":
-        sys.exit(supervise())
+        try:
+            code = supervise()
+        except BaseException as exc:
+            log(f"Supervisor stopped by {type(exc).__name__}: {exc}")
+            raise
+        log(f"Supervisor {os.getpid()} finished")
+        sys.exit(code)
     elif action == "status":
         status()
     elif action == "stop":
