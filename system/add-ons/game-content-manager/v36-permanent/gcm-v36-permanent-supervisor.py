@@ -391,7 +391,6 @@ def supervise():
             log("Launching GCM v3.6")
             env["GCM_V36_RUNTIME_DIR"] = str(RUNTIME)
             env["PYTHONDONTWRITEBYTECODE"] = "1"
-            env["PYTHONNOUSERSITE"] = "1"
 
             with LOG.open("ab") as output:
                 child = subprocess.Popen(
