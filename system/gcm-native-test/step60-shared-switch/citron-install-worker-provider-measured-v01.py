@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent
 
 def provider():
     path = ROOT / "citron-install-provider-v03-measured-v01.py"
-    expected = "7a23950119e9f22539105d8b8a4fe8590ce4b190f3a2f22111e6351795d6c047"
+    expected = "69608e53319b7243e73774c324024314b10b488b9e3f1702fa5d2a6a58394141"
     if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
         raise ValueError("Global install provider changed")
     spec = importlib.util.spec_from_file_location("global_install_provider", path)

@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parent
 
 def provider():
     path = ROOT / "ryujinx-install-provider-v02-measured-v01-switch-routes-v01-space-v01.py"
-    expected = "f800f248045b48ad6174b80bb275a5dd3ba8f24cad89dbc9804ba5e25c3c04bb"
+    expected = "c2da802cef617aa8cef41c42f940c6bdc5d104db35933e48c9c8a8d5a6a250fa"
     if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
         raise ValueError("Global install provider changed")
     spec = importlib.util.spec_from_file_location("global_install_provider", path)

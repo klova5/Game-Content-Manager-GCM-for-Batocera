@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 ROOT=Path(__file__).resolve().parent.parent
 JOB_NAME='beta-shared-dlc-jobs-v03/gcm-shared-dlc-action-job-v02.py'
-JOB_SHA256='431750667874277b0f2e6e8e0792c4283bdb5b4bfebdad4d0c696065afc10fb6'
+JOB_SHA256='b8888d98e7f6882589008f6b6eca54f38a40a59f4be036d4eaa1e2856dbfd673'
 
 def dependency():
     path=ROOT/JOB_NAME

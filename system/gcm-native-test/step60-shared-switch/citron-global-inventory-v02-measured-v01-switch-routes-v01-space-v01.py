@@ -20,9 +20,9 @@ def load(name, expected):
 
 def query(rom, content_type):
     native = load("citron-installed-rows-measured-v01.py",
-        "c6e0536e81ae6841afbe205301f3a212963af76cd4da12fe3a8c29f3190d846e")
+        "08ad3056382bfb3d6cc0c511a0bed39e018252b8443a037fd9fad69a3a8317ee")
     shared = load("gcm-switch-candidate-cache-measured-v01-switch-routes-v01-space-v01.py",
-        "9c17102a26bdd5ace61c1b6a151119958d681e8e3aeea2d858f42917f0bb2a14")
+        "f5eedc24f5000fd69f0d2599e396028a09249d32e99b4b618750807e258a603f")
     before = native.CONFIG.read_bytes()
     application, installed = native.records(rom, content_type)
     output = native.rows(rom, content_type)
@@ -63,7 +63,7 @@ def query(rom, content_type):
 
 def summary(rom):
     native = load("citron-installed-rows-measured-v01.py",
-        "c6e0536e81ae6841afbe205301f3a212963af76cd4da12fe3a8c29f3190d846e")
+        "08ad3056382bfb3d6cc0c511a0bed39e018252b8443a037fd9fad69a3a8317ee")
     before = native.CONFIG.read_bytes()
     updates = [line.split("\t") for line in native.rows(rom, "update")]
     dlc = [line.split("\t") for line in native.rows(rom, "dlc")]

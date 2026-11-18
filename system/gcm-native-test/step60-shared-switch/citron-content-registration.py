@@ -55,7 +55,7 @@ def register(managed, verified_report, expected_config_sha256, *,
     if not callable(read_inventory) or not callable(refresh_inventory):
         raise ValueError("Verified inventory callbacks required")
     planner = load(ROOT / "citron-registration-plan.py",
-        "c78ccd7a9a76f448fc33085aa44374ddef1b1e7d2bba9532094512b901763024")
+        "e0e22248eb3d8289158a91996b19cd45f1dd7206bc45d6b0cca76ce069fa7965")
     publisher = load(ROOT / "citron-content-publication.py",
         "b850734f6f1ed6df2fd361779e253ab4374e97da96149ddbd5e6a409af1abe37")
     writer = load(COMPONENTS / "citron-dlc-toggle.py",

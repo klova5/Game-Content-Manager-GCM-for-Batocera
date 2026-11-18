@@ -3,7 +3,7 @@ import argparse,base64,contextlib,fcntl,hashlib,importlib.util,io,json,os,re,sys
 from pathlib import Path
 COMMON=Path('/userdata/system/gcm-native-test/step61-common-content');SWITCH=COMMON.parent/'step60-shared-switch'
 STORE=COMMON/'state/dlc-identity-admission-v01.json';LOCK=STORE.with_suffix('.lock');SCHEMA='GCM_DLC_IDENTITY_ADMISSION_V1'
-PINS={'inplace':(COMMON/'beta-switch-dlc-inplace-v01/gcm-switch-dlc-inplace-v01.py','a1ca71109e002606a900f82b9dae7dede20351f21b4dca34d111f11b782bbb58'),'base':(SWITCH/'gcm-switch-base-identity-measured-v01.py','99f68705f60da1217d88bb5253cd2e25f31be49fff59f30d6b3e6bd809a5579a'),'metadata':(COMMON/'beta-dlc-stage-separation-v02/gcm-v35-nsp-identity-dlcid-v01.py','b8b8d24528728d7506bf951e47bed7752a52231306eaf44a78d20fbd0002fb92'),'install':(COMMON/'beta-shared-dlc-jobs-v02/gcm-shared-dlc-workflow-v02.py','94989006c2872f60705f26da5ac0407664809f5dbfb40fadb6369413c9691bd1')}
+PINS={'inplace':(COMMON/'beta-switch-dlc-inplace-v01/gcm-switch-dlc-inplace-v01.py','402f452226eae033079ddbdd5fd0d4ce1687782d17e05e0c063eab7f35707d26'),'base':(SWITCH/'gcm-switch-base-identity-measured-v01.py','99f68705f60da1217d88bb5253cd2e25f31be49fff59f30d6b3e6bd809a5579a'),'metadata':(COMMON/'beta-dlc-stage-separation-v02/gcm-v35-nsp-identity-dlcid-v01.py','b8b8d24528728d7506bf951e47bed7752a52231306eaf44a78d20fbd0002fb92'),'install':(COMMON/'beta-shared-dlc-jobs-v02/gcm-shared-dlc-workflow-v02.py','896fbab8308ee28d53698d1257e18cb0129f1525715bc91700a402c60cc06268')}
 def safe(p):
  p=Path(p)
  if any(q.is_symlink() for q in (p,*p.parents)):raise ValueError('Unsafe DLC identity path')

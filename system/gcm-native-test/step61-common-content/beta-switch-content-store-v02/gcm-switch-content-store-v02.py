@@ -25,7 +25,7 @@ STORE = CONTENT / 'switch'
 OLD_CITRON = CONTENT / 'citron-registered'
 REVIEW = STORE / '.gcm-duplicates-review'
 INPLACE = (GCM / 'step61-common-content/beta-switch-dlc-inplace-v02/gcm-switch-dlc-inplace-v02.py',
-           '1bde68699c69213949604e45907195500010aae4561fa95ae725baa646447f6a')
+           '3561294a91c2b7740c72aa1b3ed03d0fa87fedffeebf74e8f73e389976b8d072')
 KIND_DIR = {'dlc': 'dlc', 'update': 'updates'}
 _INPLACE = []
 

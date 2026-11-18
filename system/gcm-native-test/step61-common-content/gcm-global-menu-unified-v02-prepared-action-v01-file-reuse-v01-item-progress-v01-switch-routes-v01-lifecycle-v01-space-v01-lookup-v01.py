@@ -16,7 +16,7 @@ MANAGED=Path('/userdata/system/game-content/ps4')
 GAMES=Path('/userdata/roms/ps4')
 # Replaced with immutable module pins by the staging builder.
 PINS={}
-MODULES={'evidence': ('/userdata/system/gcm-native-test/step61-common-content/gcm-global-menu-file-evidence.py', 'a2b6d031d580ce3aff78d63b977178ff12e98ecab76e1d157907b10282cbd1e3'), 'identity': ('/userdata/system/gcm-native-test/step61-common-content/gcm-ps4-base-identity.py', 'f379faaf240e203a41ff7b53c5c6b41139f7427fbc978b774e131d8d90566438'), 'sfo': ('/userdata/system/gcm-native-test/step61-common-content/gcm-sfo-metadata.py', '282a3d70dcac1ba554ede4b588910dd437b2a9b5bf236d9c8e3734786e524b41'), 'native': ('/userdata/system/gcm-native-test/step61-common-content/gcm-platform-native-bridge.py', '7263d407168d02de3b55a1db9b7aa85a4f0469f658e8cc4fc124fddc8f6b767c'), 'dlc_configuration': ('/userdata/system/gcm-native-test/step61-common-content/gcm-ps4-dlc-selection.py', 'b7db3388b8bf030b9e458b8891bf2acdb6165c513c2d662ceaa54a46808a626b'), 'platform': ('/userdata/system/gcm-native-test/step61-common-content/gcm-platform-global-backend-unified-v01-prepared-action-v01-file-reuse-v01-item-progress-v01-lifecycle-v01-space-v01-lookup-v01.py', '60674337130b16e42bc4f851ad3f7ada84b64d5a7b64fcccfa2c0a31b7031d6e'), 'citron': ('/userdata/system/gcm-native-test/step60-shared-switch/citron-global-backend-measured-v01-switch-routes-v01-space-v01-lookup-v01.py', '3334779c3d15d3dd11ab8d099796596540eca7d049f7ec0aa58a244fdd7ff3f9'), 'ryujinx': ('/userdata/system/gcm-native-test/step60-shared-switch/ryujinx-global-backend-measured-v01-switch-routes-v01-space-v01.py', '1156b3a49ae5b1aecaff48ec29626258c24af43de7e2de8bf6fbeec2cceb9980'), 'dlc_store': ('/userdata/system/gcm-native-test/step61-common-content/gcm-ps4-dlc-version-store-measured-v02-menu-evidence-v01-prepared-action-v01-file-reuse-v01-space-v01-lookup-v01.py', '1e1ecab1dcb632431f8ec702bb9797c97c6a138968b12168c85d17363532cc9f'), 'installed_service': ('/userdata/system/gcm-native-test/step61-common-content/gcm-platform-content-service-v03-measured-v01-menu-evidence-v01-space-v01-lookup-v01.py', '2b9ab6a2bdad2e235e82de9dccc8f692dfc5d183dc056b6b8206ac102ba2d79b')}
+MODULES={'evidence': ('/userdata/system/gcm-native-test/step61-common-content/gcm-global-menu-file-evidence.py', 'a2b6d031d580ce3aff78d63b977178ff12e98ecab76e1d157907b10282cbd1e3'), 'identity': ('/userdata/system/gcm-native-test/step61-common-content/gcm-ps4-base-identity.py', 'f379faaf240e203a41ff7b53c5c6b41139f7427fbc978b774e131d8d90566438'), 'sfo': ('/userdata/system/gcm-native-test/step61-common-content/gcm-sfo-metadata.py', '282a3d70dcac1ba554ede4b588910dd437b2a9b5bf236d9c8e3734786e524b41'), 'native': ('/userdata/system/gcm-native-test/step61-common-content/gcm-platform-native-bridge.py', '7263d407168d02de3b55a1db9b7aa85a4f0469f658e8cc4fc124fddc8f6b767c'), 'dlc_configuration': ('/userdata/system/gcm-native-test/step61-common-content/gcm-ps4-dlc-selection.py', 'b7db3388b8bf030b9e458b8891bf2acdb6165c513c2d662ceaa54a46808a626b'), 'platform': ('/userdata/system/gcm-native-test/step61-common-content/gcm-platform-global-backend-unified-v01-prepared-action-v01-file-reuse-v01-item-progress-v01-lifecycle-v01-space-v01-lookup-v01.py', '60674337130b16e42bc4f851ad3f7ada84b64d5a7b64fcccfa2c0a31b7031d6e'), 'citron': ('/userdata/system/gcm-native-test/step60-shared-switch/citron-global-backend-measured-v01-switch-routes-v01-space-v01-lookup-v01.py', '87ef6910a5443343f95343392e4cc94be20861a6ec8eecbeedb0acceb7009867'), 'ryujinx': ('/userdata/system/gcm-native-test/step60-shared-switch/ryujinx-global-backend-measured-v01-switch-routes-v01-space-v01.py', 'ccdce1cd8a8f0a6918c01534f21a1a565fe3956ddc7604eb85472ba7ec71de90'), 'dlc_store': ('/userdata/system/gcm-native-test/step61-common-content/gcm-ps4-dlc-version-store-measured-v02-menu-evidence-v01-prepared-action-v01-file-reuse-v01-space-v01-lookup-v01.py', '1e1ecab1dcb632431f8ec702bb9797c97c6a138968b12168c85d17363532cc9f'), 'installed_service': ('/userdata/system/gcm-native-test/step61-common-content/gcm-platform-content-service-v03-measured-v01-menu-evidence-v01-space-v01-lookup-v01.py', '2b9ab6a2bdad2e235e82de9dccc8f692dfc5d183dc056b6b8206ac102ba2d79b')}
 
 def load(key):
     path,expected=MODULES[key]
@@ -204,23 +204,35 @@ def inventory(rom,kind,assess=False):
     if not latest[4] and not assess:queue(rom)
     return rows
 
+def assessment_status(rom):
+    """61TJ: the background check's last result for this game in this boot (RUNNING, PASS, ERROR or None)."""
+    evidence=load('evidence')
+    key=hashlib.sha256(str(load('identity').identify(rom)['metadata_path']).encode()).hexdigest()
+    try:data=json.loads(evidence.safe(ROOT/'state/global-menu-assessments'/(key+'.json')).read_text())
+    except (OSError,ValueError):return None
+    return data.get('status') if data.get('boot_id')==evidence.boot() else None
+
 def summary(rom):
     evidence,identity,base,updates,update_ok=states(rom,'update')
     _,_,_,dlc,dlc_ok=states(rom,'dlc')
     active=[r for r,s in updates.values() if s=='ACTIVE']
     if len(active)>1:raise ValueError('Ambiguous selected update')
-    if not update_ok:update='UNASSESSED'
+    failed=(not update_ok or not dlc_ok) and assessment_status(rom)=='ERROR'
+    waiting='CHECK FAILED' if failed else 'ASSESSING'
+    if not update_ok:update=waiting
     elif active:update=active[0]['version']+' ACTIVE'
     else:
         metadata=load('sfo').read(base)
         update=str(metadata['fields'].get('APP_VER','UNKNOWN'))+' (BASE)'
     count=sum(s=='ENABLED' for r,s in dlc.values())
-    text=str(count)+' ENABLED' if dlc_ok else 'UNASSESSED'
+    text=str(count)+' ENABLED' if dlc_ok else waiting
     addons=evidence.safe(GAMES/'DLC'/identity['application_id'])
     labels={r['entitlement_label'] for r,s in dlc.values()}
     unknown=sum(evidence.safe(p).is_dir() and p.name not in labels for p in addons.iterdir()) if addons.exists() else 0
-    if unknown:text+=' / '+str(unknown)+' UNASSESSED'
-    if not update_ok or not dlc_ok:queue(rom)
+    if unknown:text+=' / '+str(unknown)+' NOT RECOGNISED'
+    # A failed check is not retried from the summary (it would loop while the menu refreshes);
+    # opening the Updates or DLC list still starts a new check.
+    if (not update_ok or not dlc_ok) and not failed:queue(rom)
     return ['SUMMARY\t'+update+'\t'+text]
 
 def main():

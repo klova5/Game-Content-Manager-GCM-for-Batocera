@@ -30,6 +30,48 @@ V34_SHA = "b36c766420752fc0530f17fef4bc52995328f863485fd4b2a90403558abf5cd3"
 V36_SHA = "b9d747269d85d306db4caaaf380c37aa06110c4e85e300e97bded56e5c4f846a"
 
 
+STANDARD = Path("/usr/bin/emulationstation")
+
+
+def standard_frontend_problem():
+    """61TI: the fallback is whatever frontend Batocera ships, so a Batocera update never blocks GCM.
+    Only refuse when the file is missing or something is mounted over it."""
+    if not STANDARD.is_file() or not os.access(STANDARD, os.X_OK):
+        return f"{STANDARD} missing or not executable"
+    try:
+        mounts = Path("/proc/self/mountinfo").read_text().splitlines()
+    except OSError:
+        return None
+    if any(len(f) > 4 and f[4] == str(STANDARD) for f in (line.split() for line in mounts)):
+        return f"{STANDARD} has something mounted over it; expected the stock frontend"
+    return None
+
+
+def live_x_cookie():
+    """61TI: Batocera 44 keeps X's cookie in /userdata/system/.serverauth.<n>; read it from the running X server."""
+    for proc in Path("/proc").glob("[0-9]*"):
+        try:
+            args = (proc / "cmdline").read_bytes().split(b"\0")
+        except OSError:
+            continue
+        if args and args[0].endswith(b"/X") and b"-auth" in args:
+            i = args.index(b"-auth")
+            if i + 1 < len(args):
+                cookie = Path(args[i + 1].decode("utf-8", "replace"))
+                if cookie.is_file():
+                    return str(cookie)
+    return None
+
+
+def x_authority(current):
+    """Keep a working cookie; otherwise /.Xauthority if present; otherwise the running X server's cookie."""
+    if current and Path(current).is_file():
+        return current
+    if Path("/.Xauthority").exists():
+        return "/.Xauthority"
+    return live_x_cookie() or current or "/.Xauthority"
+
+
 def checksum(path):
     digest = hashlib.sha256()
     with open(path, "rb") as stream:
@@ -132,7 +174,7 @@ def graphical_environment(pid):
 
     environment["HOME"] = "/userdata/system"
     environment.setdefault("DISPLAY", ":0")
-    environment.setdefault("XAUTHORITY", "//.Xauthority")
+    environment["XAUTHORITY"] = x_authority(environment.get("XAUTHORITY"))
     environment.setdefault("XDG_RUNTIME_DIR", "/var/run")
 
     environment.pop("LD_TRACE_LOADED_OBJECTS", None)
@@ -261,8 +303,9 @@ def supervise():
         signal.signal(signal.SIGINT, request_stop)
 
         try:
-            if checksum("/usr/bin/emulationstation") != V34_SHA:
-                raise RuntimeError("Live v3.4 checksum mismatch")
+            problem = standard_frontend_problem()
+            if problem:
+                raise RuntimeError(problem)
 
             if checksum(BIN) != V36_SHA:
                 raise RuntimeError("Permanent v3.6 checksum mismatch")

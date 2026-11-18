@@ -7,7 +7,7 @@ import subprocess
 import sys
 ROOT=Path('/userdata/system/gcm-native-test/step61-common-content')
 PRIOR='gcm-global-menu-existing-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py'
-PINS={'gcm-global-menu-existing-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py': '16cd5f04492150c36bd08ac33c572783df747b661424a78465153c94f9245981', 'gcm-switch-install-locally-v01.py': '7ba756e389403b0bc5d12285afb0dedd311cc652edbccf8f740d53c483345471'}
+PINS={'gcm-global-menu-existing-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py': 'deb04c9a0ca24a4d25bf5b7f321f94b6a40e9e72d33d7504b478c650e226e7e5', 'gcm-switch-install-locally-v01.py': '7ba756e389403b0bc5d12285afb0dedd311cc652edbccf8f740d53c483345471'}
 
 _GCM_DECLARED_CODE_NAMES = {'gcm-global-menu-existing-v01-switch-routes-v01-lifecycle-v01-space-v01.py': 'gcm-global-menu-existing-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py', 'gcm-global-menu-existing-v01-switch-routes-v01-lifecycle-v01.py': 'gcm-global-menu-existing-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py'}
 

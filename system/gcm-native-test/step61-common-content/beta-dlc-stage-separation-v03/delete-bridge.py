@@ -3,11 +3,11 @@ import argparse,contextlib,fcntl,hashlib,importlib.util,json,os,re,stat,subproce
 from pathlib import Path
 COMMON=Path('/userdata/system/gcm-native-test/step61-common-content')
 WORKFLOW_SHA='dd7dedef3dd55ec6a941f96cf518acc28a2375717bdd7885bcdc5bfe6a606593'
-MENU_PINS={'step61-common-content/gcm-global-menu-existing-v01.py': 'ceded0b0b6376fa584ccc69691cbaa6e435c2de98ce4728c7e60eaa1b69fae73', 'step61-common-content/beta-global-update-v01/gcm-global-update-workflow-v01.py': 'dd7dedef3dd55ec6a941f96cf518acc28a2375717bdd7885bcdc5bfe6a606593', 'step61-common-content/beta-native-folder-batch-v06/gcm-native-folder-batch-v01.py': '2f9c1bf01577888ebe78202b365add28d66bd25760b2ce61e4ea3d154b595102'}
-ACTIVATION_SHA='ceacdca05d3925f6ed21b835d21decbe2347f77c2b3fe1a9028a9b850046a74f'
+MENU_PINS={'step61-common-content/gcm-global-menu-existing-v01.py': '6f0840ec42e4e2445804df30e4f6e145f807560cb992d2894a9696db2c411a47', 'step61-common-content/beta-global-update-v01/gcm-global-update-workflow-v01.py': 'dd7dedef3dd55ec6a941f96cf518acc28a2375717bdd7885bcdc5bfe6a606593', 'step61-common-content/beta-native-folder-batch-v06/gcm-native-folder-batch-v01.py': '2f9c1bf01577888ebe78202b365add28d66bd25760b2ce61e4ea3d154b595102'}
+ACTIVATION_SHA='886660e1a9605565306c5fc9e941ffe692da806b184c6945e272e0d247b56f46'
 def dlc_identity():
  p=COMMON/'beta-dlc-stage-separation-v03/gcm-dlc-stage-workflow-v01.py'
- if any(q.is_symlink() for q in (p,*p.parents)) or hashlib.sha256(p.read_bytes()).hexdigest()!='3d239e3a6855260d42a676ad449adeb0e81ae84d3b18548d86c929ebfbde5d35':raise ValueError('DLC identity delete bridge changed')
+ if any(q.is_symlink() for q in (p,*p.parents)) or hashlib.sha256(p.read_bytes()).hexdigest()!='7542e3ed3a5a8e53171aca7d696dae41c57d1e6afe768db4695d5061f1956ab5':raise ValueError('DLC identity delete bridge changed')
  spec=importlib.util.spec_from_file_location('dlc_identity_delete',p);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
 
 def workflow():

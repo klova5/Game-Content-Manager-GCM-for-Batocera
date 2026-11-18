@@ -36,7 +36,7 @@ def register(rom, managed, proof, *, native, read_game,
     planner = load("ryujinx-registration-plan.py",
         "282d0db06087279b264bac6cf9a2a1ae28b1719b22fb64f175d0aa2fa33dbcd7")
     operations = load("ryujinx-global-backend.py",
-        "701fe33d5d7ac6b8195261240bd794e9ea818888d0b34e24d589c681d8618fdb")
+        "d84eb9c888ab6b8b9f8a6986a1c52236a41b55de9523603bc33daefb7287271d")
     adapter = load("ryujinx-native-adapter.py",
         "dbf3498d04fb0d38a2c0ed09b5fc34bd6943a7bfec80b8ede2e78351085f1141")
     _, _, writer = operations.dependencies()

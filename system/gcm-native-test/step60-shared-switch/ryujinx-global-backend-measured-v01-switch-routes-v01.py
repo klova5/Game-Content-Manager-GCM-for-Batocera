@@ -23,7 +23,7 @@ def load(path, expected):
 
 def dependencies():
     inventory = load(ROOT / "ryujinx-global-inventory-measured-v01-switch-routes-v01.py",
-        "67f0bbb1a06e99f04415e74489cc0f1d92f7a8f8d0738c059d1974a478d5baa5")
+        "8c65156429fb749a05a8ae938ee826dafd2bd43b7256fcafa13647a75a0f08cd")
     adapter = load(ROOT / "ryujinx-native-adapter-measured-v01.py",
         "155db518541f0196773ef338995f9864c1225f26a813a71ea3459edabb3a0301")
     writer = load(Path(

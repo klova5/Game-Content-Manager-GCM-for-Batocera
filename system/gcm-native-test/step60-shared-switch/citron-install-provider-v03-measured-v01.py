@@ -27,9 +27,9 @@ def dependencies():
     integrity = load(ROOT / "citron-installed-integrity.py",
         "987136c7420b9b27e9e15c9f6c00e45d4e30a17f9a4cab7113de51951a8cfebc")
     planner = load(ROOT / "citron-registration-plan.py",
-        "c78ccd7a9a76f448fc33085aa44374ddef1b1e7d2bba9532094512b901763024")
+        "e0e22248eb3d8289158a91996b19cd45f1dd7206bc45d6b0cca76ce069fa7965")
     native = load(ROOT / "citron-installed-rows-measured-v01.py",
-        "c6e0536e81ae6841afbe205301f3a212963af76cd4da12fe3a8c29f3190d846e")
+        "08ad3056382bfb3d6cc0c511a0bed39e018252b8443a037fd9fad69a3a8317ee")
     packages = load(COMPONENTS / "citron-package-verify-v03.py",
         "9244d98550821644d2e54fe933010b478e3646964e12ac10233080578074a388")
     return copier, integrity, planner, native, packages
@@ -132,7 +132,7 @@ def install(rom, token, content_type, *, confirm=False):
     writer = load(COMPONENTS / "citron-dlc-toggle.py",
         "28d91a9d2e24faecd16bdf6a3e72c212b16be3c27cf08196c244e7f751efcadf")
     transaction = load(ROOT / "citron-content-registration.py",
-        "b73d2bf2d56ac40cbdb00e8215e12854f7b8d58c7950c7092f8e74051347a27a")
+        "c95291226a656fe60862a1920b90b0fd530192a5376a4ec1b8f28d72795c1994")
     catalog = load(ROOT / "citron-content-catalog.py",
         "6dec4983cb4c7f6707d4604db6f11c5cca01d0d1a9e2f20169e5df84d1e79cfa")
     state = ROOT / "state"

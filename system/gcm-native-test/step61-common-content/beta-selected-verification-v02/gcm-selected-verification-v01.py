@@ -2,7 +2,7 @@
 import argparse,contextlib,hashlib,importlib.util,io,json,os,re,subprocess,sys,time
 from pathlib import Path
 COMMON=Path('/userdata/system/gcm-native-test/step61-common-content')
-PINS={'beta-global-update-v01/gcm-global-update-workflow-v01.py': 'dd7dedef3dd55ec6a941f96cf518acc28a2375717bdd7885bcdc5bfe6a606593', 'beta-managed-delete-v01/gcm-managed-delete-v01.py': 'aa5f2bd124dec01ffb2db8d0e52d3fee98f66ddda31ab1e08cc860ad3e430ca4', 'gcm-global-install-locally-job-v02.py': 'b31210c436b32db9ed365c89b930fe5a7ac6fcacf17cefc3bd515569ebaface7', 'beta-native-folder-batch-v05/gcm-native-folder-batch-v01.py': '8e9f6537c38ed0ae49b12d93b6047bc597b0c3a746f891f247b8b4a13bd03db9', 'beta-shared-dlc-jobs-v02/gcm-shared-dlc-workflow-v02.py': '94989006c2872f60705f26da5ac0407664809f5dbfb40fadb6369413c9691bd1'}
+PINS={'beta-global-update-v01/gcm-global-update-workflow-v01.py': 'dd7dedef3dd55ec6a941f96cf518acc28a2375717bdd7885bcdc5bfe6a606593', 'beta-managed-delete-v01/gcm-managed-delete-v01.py': 'ca432cd7fd51ab8a969fbc4e1b87c1ff831541b133d013e8185d20794e90ba0a', 'gcm-global-install-locally-job-v02.py': 'b31210c436b32db9ed365c89b930fe5a7ac6fcacf17cefc3bd515569ebaface7', 'beta-native-folder-batch-v05/gcm-native-folder-batch-v01.py': '8e9f6537c38ed0ae49b12d93b6047bc597b0c3a746f891f247b8b4a13bd03db9', 'beta-shared-dlc-jobs-v02/gcm-shared-dlc-workflow-v02.py': '896fbab8308ee28d53698d1257e18cb0129f1525715bc91700a402c60cc06268'}
 def load(relative):
  p=COMMON/relative
  if any(q.is_symlink() for q in (p,*p.parents)) or hashlib.sha256(p.read_bytes()).hexdigest()!=PINS[relative]:raise ValueError('Verification dependency changed: '+relative)

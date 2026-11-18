@@ -16,7 +16,7 @@ from pathlib import Path
 COMMON = Path(os.environ.get('GCM_COMMON', '/userdata/system/gcm-native-test/step61-common-content'))
 GAME_CONTENT = Path(os.environ.get('GCM_GAME_CONTENT', '/userdata/system/game-content'))
 INPLACE = COMMON / 'beta-switch-dlc-inplace-v02/gcm-switch-dlc-inplace-v02.py'
-INPLACE_SHA = os.environ.get('GCM_INPLACE_SHA', '1bde68699c69213949604e45907195500010aae4561fa95ae725baa646447f6a')
+INPLACE_SHA = os.environ.get('GCM_INPLACE_SHA', '3561294a91c2b7740c72aa1b3ed03d0fa87fedffeebf74e8f73e389976b8d072')
 EMULATORS = ('citron', 'eden', 'yuzu', 'ryujinx')
 
 

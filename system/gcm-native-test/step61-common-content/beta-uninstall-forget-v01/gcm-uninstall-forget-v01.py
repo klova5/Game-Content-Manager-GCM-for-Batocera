@@ -12,9 +12,9 @@ import argparse, hashlib, importlib.util, json, os, sys, time
 from pathlib import Path
 
 COMMON = Path(os.environ.get('GCM_COMMON', '/userdata/system/gcm-native-test/step61-common-content'))
-TOOLS = {'managed': ('beta-managed-delete-v01/gcm-managed-delete-v01.py', os.environ.get('GCM_MANAGED_SHA', 'aa5f2bd124dec01ffb2db8d0e52d3fee98f66ddda31ab1e08cc860ad3e430ca4')),
-         'bridge': ('beta-dlc-stage-separation-v04/delete-bridge.py', os.environ.get('GCM_BRIDGE_SHA', 'b41453d59c78897b7774adf973a65ef3dc6d428b5dc505f992c567d44d18d080')),
-         'inplace': ('beta-switch-dlc-inplace-v02/gcm-switch-dlc-inplace-v02.py', os.environ.get('GCM_INPLACE_SHA', '1bde68699c69213949604e45907195500010aae4561fa95ae725baa646447f6a'))}
+TOOLS = {'managed': ('beta-managed-delete-v01/gcm-managed-delete-v01.py', os.environ.get('GCM_MANAGED_SHA', 'ca432cd7fd51ab8a969fbc4e1b87c1ff831541b133d013e8185d20794e90ba0a')),
+         'bridge': ('beta-dlc-stage-separation-v04/delete-bridge.py', os.environ.get('GCM_BRIDGE_SHA', '5a824bfd57be37607837faf0dfdadac3d2d6110614d3510f1a17af7fb14fc655')),
+         'inplace': ('beta-switch-dlc-inplace-v02/gcm-switch-dlc-inplace-v02.py', os.environ.get('GCM_INPLACE_SHA', '3561294a91c2b7740c72aa1b3ed03d0fa87fedffeebf74e8f73e389976b8d072'))}
 STATE = COMMON / 'state/uninstall-forget'
 SWITCH = ('ryujinx', 'citron-emu', 'citron')
 

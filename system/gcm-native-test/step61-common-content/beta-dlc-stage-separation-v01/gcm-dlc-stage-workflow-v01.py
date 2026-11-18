@@ -3,7 +3,7 @@ import argparse,base64,contextlib,fcntl,hashlib,importlib.util,io,json,os,re,sys
 from pathlib import Path
 COMMON=Path('/userdata/system/gcm-native-test/step61-common-content');SWITCH=COMMON.parent/'step60-shared-switch'
 STORE=COMMON/'state/dlc-identity-admission-v01.json';LOCK=STORE.with_suffix('.lock');SCHEMA='GCM_DLC_IDENTITY_ADMISSION_V1'
-PINS={'base':(SWITCH/'gcm-switch-base-identity-measured-v01.py','99f68705f60da1217d88bb5253cd2e25f31be49fff59f30d6b3e6bd809a5579a'),'metadata':(COMMON.parent/'v34-development/v35-native-development/gcm-v35-nsp-identity-measured-v01.py','d480e9ac718ab634ef1335f208f0cc885038229d7f702540ec62eedb8cf8f666'),'install':(COMMON/'beta-shared-dlc-jobs-v02/gcm-shared-dlc-workflow-v02.py','94989006c2872f60705f26da5ac0407664809f5dbfb40fadb6369413c9691bd1')}
+PINS={'base':(SWITCH/'gcm-switch-base-identity-measured-v01.py','99f68705f60da1217d88bb5253cd2e25f31be49fff59f30d6b3e6bd809a5579a'),'metadata':(COMMON.parent/'v34-development/v35-native-development/gcm-v35-nsp-identity-measured-v01.py','d480e9ac718ab634ef1335f208f0cc885038229d7f702540ec62eedb8cf8f666'),'install':(COMMON/'beta-shared-dlc-jobs-v02/gcm-shared-dlc-workflow-v02.py','896fbab8308ee28d53698d1257e18cb0129f1525715bc91700a402c60cc06268')}
 def safe(p):
  p=Path(p)
  if any(q.is_symlink() for q in (p,*p.parents)):raise ValueError('Unsafe DLC identity path')

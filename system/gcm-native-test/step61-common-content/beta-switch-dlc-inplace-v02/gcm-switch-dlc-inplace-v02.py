@@ -25,9 +25,9 @@ PINS = {
     'ryujinx_integrity': (SWITCH / 'ryujinx-installed-integrity-v02-measured-v01.py', '144796758dcdd3934b2b7a8655509c676f147d0ba6891c83f8591977225ce694'),
     'citron_catalog': (SWITCH / 'citron-content-catalog.py', '6dec4983cb4c7f6707d4604db6f11c5cca01d0d1a9e2f20169e5df84d1e79cfa'),
     'citron_integrity': (SWITCH / 'citron-installed-integrity.py', '987136c7420b9b27e9e15c9f6c00e45d4e30a17f9a4cab7113de51951a8cfebc'),
-    'citron_rows': (SWITCH / 'citron-installed-rows-measured-v01.py', 'c6e0536e81ae6841afbe205301f3a212963af76cd4da12fe3a8c29f3190d846e'),
-    'citron_plan': (SWITCH / 'citron-content-plan.py', 'aae0d5039b57b6a497d4415a0268bcb69195fe218e7adef52ad6e7f194be6b56'),
-    'citron_transaction': (SWITCH / 'citron-configuration-transaction-measured-v01.py', '57fdca525e8ef8b5bb8a051050d3ac48cd8189dfb3f4114c43ceb6ba9ef05bdd'),
+    'citron_rows': (SWITCH / 'citron-installed-rows-measured-v01.py', '08ad3056382bfb3d6cc0c511a0bed39e018252b8443a037fd9fad69a3a8317ee'),
+    'citron_plan': (SWITCH / 'citron-content-plan.py', '969947f8fbd844bc07728d4a235a9e7bb30bc7592fd6681eb47054cc3de185ff'),
+    'citron_transaction': (SWITCH / 'citron-configuration-transaction-measured-v01.py', 'ff28cb61e26de41cc0906c362a753b6337e3a643fdb1d8cbbb882d57e3de7c81'),
     'citron_toggle': (COMPONENTS / 'citron-dlc-toggle.py', '28d91a9d2e24faecd16bdf6a3e72c212b16be3c27cf08196c244e7f751efcadf'),
     'citron_nand': (COMPONENTS / 'citron-nand-verify-v02.py', '35ca963cd6326d486de4e610773c080892c8246e3836f84d0c849457b6abab60'),
 }

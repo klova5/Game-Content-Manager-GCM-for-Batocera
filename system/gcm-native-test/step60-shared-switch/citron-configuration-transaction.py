@@ -57,7 +57,7 @@ def commit(application_id, desired, expected_hash, *,
         "48387f6f5157aaf22f9763813006fce44dbad8828da6c7c78c4351f851fc41a3",
         "shared_config_editor")
     rows = load(ROOT / "citron-installed-rows.py",
-        "8be6c58ecceaef24c6f96c3ece1e5251112c598a7a1a7d05d3d8aea89fd3b42b",
+        "87020af7b2b929239e3dcd6ed21fa1a130cb4085762df2cd900468dbc609ee5a",
         "shared_config_reader")
     config_path = Path(config_path)
     if config_path.is_symlink():

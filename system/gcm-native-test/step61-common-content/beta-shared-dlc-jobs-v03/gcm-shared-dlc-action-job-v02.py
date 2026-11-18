@@ -20,13 +20,13 @@ PINS = {
     str(ROOT / "gcm-platform-global-backend-unified-v01-prepared-action-v01-file-reuse-v01-item-progress-v01-lifecycle-v01-space-v01-lookup-v01.py"):
         "60674337130b16e42bc4f851ad3f7ada84b64d5a7b64fcccfa2c0a31b7031d6e",
     str(SWITCH / "citron-global-backend-measured-v01-switch-routes-v01-space-v01-lookup-v01.py"):
-        "3334779c3d15d3dd11ab8d099796596540eca7d049f7ec0aa58a244fdd7ff3f9",
+        "87ef6910a5443343f95343392e4cc94be20861a6ec8eecbeedb0acceb7009867",
     str(SWITCH / "ryujinx-global-backend-measured-v01-switch-routes-v01-space-v01.py"):
-        "1156b3a49ae5b1aecaff48ec29626258c24af43de7e2de8bf6fbeec2cceb9980",
+        "ccdce1cd8a8f0a6918c01534f21a1a565fe3956ddc7604eb85472ba7ec71de90",
     str(SWITCH / "citron-content-install-job-measured-v01-space-v01.py"):
-        "bd8c97b7de85be2d7c847289b6fdeb2416bdd391744ba4153d7bdb53f9bff0ac",
+        "3cdd5b7d258a6bf3009df0cebc877e6dd9ab02910527c45d590db0cd3ee46265",
     str(SWITCH / "ryujinx-content-install-job-measured-v01-switch-routes-v01-space-v01.py"):
-        "fad75ae31295b83994edf2a159769d57bc412f0f02a225e8d2ed705567cec1a9",
+        "8e8f9f8a11efaf8f1d228c6ffa61cca9ce05d4e48c130acee19bd0042229a4bc",
 }
 
 
@@ -141,9 +141,9 @@ def field(output, name):
 
 def inventory(job):
     backend = ROOT / 'gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py'
-    if backend.is_symlink() or hashlib.sha256(backend.read_bytes()).hexdigest() != '77b5e60766957cb015ea2b09e619a8b9f443fdcb54c62a3ca6806b0309c15ce5':
+    if backend.is_symlink() or hashlib.sha256(backend.read_bytes()).hexdigest() != 'fb7b8d5a6d0fcfde47e93e63f5bb4c3a894009c48cfaf7c5011dc3a4cde087e7':
         raise ValueError('Shared menu policy changed')
-    PINS[str(backend)] = '77b5e60766957cb015ea2b09e619a8b9f443fdcb54c62a3ca6806b0309c15ce5'
+    PINS[str(backend)] = 'fb7b8d5a6d0fcfde47e93e63f5bb4c3a894009c48cfaf7c5011dc3a4cde087e7'
 
     output = call(backend, [
         "--rom", job["rom"], "--emulator", job["emulator"],

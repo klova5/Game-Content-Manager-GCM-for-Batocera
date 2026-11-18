@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parent
 
 def resolution():
     path = ROOT / "citron-update-resolution.py"
-    expected = "ddc841e0c20c4a8d6e902d715db3c1221fa7cdfb05eb772263a3dd39f7375853"
+    expected = "397a7693210fde8d1dbe2e3e6f1dff77b953ebff63c4c518841e05ce0a9721c2"
     if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
         raise ValueError("Update resolver changed")
     spec = importlib.util.spec_from_file_location("registration_resolution", path)

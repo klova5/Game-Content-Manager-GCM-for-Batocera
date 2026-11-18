@@ -3,7 +3,7 @@ import argparse,contextlib,hashlib,importlib.util,json,os,re,time,uuid
 from pathlib import Path
 COMMON=Path('/userdata/system/gcm-native-test/step61-common-content')
 WORKFLOW_SHA='dd7dedef3dd55ec6a941f96cf518acc28a2375717bdd7885bcdc5bfe6a606593'
-PINS={'step61-common-content/gcm-platform-global-backend-unified-v01-prepared-action-v01-file-reuse-v01-item-progress-v01-lifecycle-v01-space-v01-lookup-v01.py': '60674337130b16e42bc4f851ad3f7ada84b64d5a7b64fcccfa2c0a31b7031d6e', 'step60-shared-switch/citron-installed-rows-measured-v01.py': 'c6e0536e81ae6841afbe205301f3a212963af76cd4da12fe3a8c29f3190d846e', 'step60-shared-switch/citron-content-plan.py': 'aae0d5039b57b6a497d4415a0268bcb69195fe218e7adef52ad6e7f194be6b56', 'step59-citron-backend-v01/citron-config-preview.py': '48387f6f5157aaf22f9763813006fce44dbad8828da6c7c78c4351f851fc41a3'}
+PINS={'step61-common-content/gcm-platform-global-backend-unified-v01-prepared-action-v01-file-reuse-v01-item-progress-v01-lifecycle-v01-space-v01-lookup-v01.py': '60674337130b16e42bc4f851ad3f7ada84b64d5a7b64fcccfa2c0a31b7031d6e', 'step60-shared-switch/citron-installed-rows-measured-v01.py': '08ad3056382bfb3d6cc0c511a0bed39e018252b8443a037fd9fad69a3a8317ee', 'step60-shared-switch/citron-content-plan.py': '969947f8fbd844bc07728d4a235a9e7bb30bc7592fd6681eb47054cc3de185ff', 'step59-citron-backend-v01/citron-config-preview.py': '48387f6f5157aaf22f9763813006fce44dbad8828da6c7c78c4351f851fc41a3'}
 def load(path,expected):
  path=Path(path)
  if any(p.is_symlink() for p in (path,*path.parents)) or hashlib.sha256(path.read_bytes()).hexdigest()!=expected:raise ValueError('Activation dependency changed: '+path.name)

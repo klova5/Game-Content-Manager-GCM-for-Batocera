@@ -70,6 +70,22 @@ def resolve(records, disabled, update_title_disabled, *, inventory_complete):
         item["internal_version"], 1 if item["origin"] == "External" else 0)
     best = max(score(item) for item in enabled)
     winners = [item for item in enabled if score(item) == best]
+    if len(winners) > 1:
+        winners = identical_copies(winners)
     if len(winners) != 1:
         raise ValueError("Multiple indistinguishable active update registrations")
     return winners[0]
+
+
+def identical_copies(winners):
+    """61TJ: the same update file reachable twice (e.g. GCM's shared Switch copy and Citron's
+    install copy) is one update. Only copies proven byte-identical by their verified package
+    hash collapse; Citron's own install copy is preferred, then the first path."""
+    hashes = {item.get("sha256") for item in winners}
+    if (len(hashes) != 1 or not isinstance(next(iter(hashes)), str)
+            or len(next(iter(hashes))) != 64
+            or len({display(item) for item in winners}) != 1):
+        return winners
+    preferred = sorted(winners, key=lambda item: (
+        "/citron-registered/" not in item["path"], item["path"]))
+    return preferred[:1]

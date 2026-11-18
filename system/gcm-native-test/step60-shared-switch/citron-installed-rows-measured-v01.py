@@ -81,7 +81,7 @@ def rows(rom, content_type):
                 ("ENABLED" if enabled else "DISABLED") + "\t" + label + "\t" + token)
     else:
         resolver = load("citron-update-resolution.py",
-            "ddc841e0c20c4a8d6e902d715db3c1221fa7cdfb05eb772263a3dd39f7375853")
+            "397a7693210fde8d1dbe2e3e6f1dff77b953ebff63c4c518841e05ce0a9721c2")
         update_title = format(int(application, 16) + 0x800, "016X")
         active = resolver.resolve(
             installed, disabled, disabled_keys(update_title),

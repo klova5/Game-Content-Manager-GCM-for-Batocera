@@ -20,7 +20,7 @@ def load(name, expected):
 
 def query(rom, content_type):
     native = load("citron-installed-rows.py",
-        "8be6c58ecceaef24c6f96c3ece1e5251112c598a7a1a7d05d3d8aea89fd3b42b")
+        "87020af7b2b929239e3dcd6ed21fa1a130cb4085762df2cd900468dbc609ee5a")
     shared = load("gcm-switch-verified-candidates.py",
         "12a739348834af57fb5b9494a7ea7f23da478babbb143e5597524d564f9d7fae")
     before = native.CONFIG.read_bytes()

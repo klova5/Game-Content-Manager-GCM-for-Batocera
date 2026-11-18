@@ -9,10 +9,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 PINS = {
-    "citron-global-inventory-v02-measured-v01-switch-routes-v01-space-v01.py": "66886c436f4bd0dc6a43c92273e5f0fd43c56973de5e4210408701d7296ddab7",
-    "citron-installed-rows-measured-v01.py": "c6e0536e81ae6841afbe205301f3a212963af76cd4da12fe3a8c29f3190d846e",
-    "citron-content-plan.py": "aae0d5039b57b6a497d4415a0268bcb69195fe218e7adef52ad6e7f194be6b56",
-    "citron-configuration-transaction-measured-v01.py": "57fdca525e8ef8b5bb8a051050d3ac48cd8189dfb3f4114c43ceb6ba9ef05bdd",
+    "citron-global-inventory-v02-measured-v01-switch-routes-v01-space-v01.py": "574d0b2afea09d762f14e3ed36b40a171465b4406c3d8a17ab88b20d033cde9f",
+    "citron-installed-rows-measured-v01.py": "08ad3056382bfb3d6cc0c511a0bed39e018252b8443a037fd9fad69a3a8317ee",
+    "citron-content-plan.py": "969947f8fbd844bc07728d4a235a9e7bb30bc7592fd6681eb47054cc3de185ff",
+    "citron-configuration-transaction-measured-v01.py": "ff28cb61e26de41cc0906c362a753b6337e3a643fdb1d8cbbb882d57e3de7c81",
     "citron-installed-integrity.py": "987136c7420b9b27e9e15c9f6c00e45d4e30a17f9a4cab7113de51951a8cfebc",
     "gcm-switch-content-engine-measured-v01.py": "7120a24469daa2e31316235a79989060777f92701628ce3711ae2b67d9b262c4",
 }

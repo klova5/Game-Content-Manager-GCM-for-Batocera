@@ -118,7 +118,7 @@ def emit(job):
 
 
 def invoke_installer(action, rom, token, confirm=False, timeout=90):
-    expected = "2ea277df407b4e019f6b7be92a5ab66618f4d443cd03d45c9f8c701a121fafd3"
+    expected = "a89933069b2a1e7af30b5e2692bf54829d27f8823884a3bfb3831ae1eb26d688"
     if INSTALLER.is_symlink() or hashlib.sha256(INSTALLER.read_bytes()).hexdigest() != expected:
         raise ValueError("Global worker provider changed")
     args = [sys.executable, "-B", str(INSTALLER), action,

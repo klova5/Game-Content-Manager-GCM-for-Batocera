@@ -1169,6 +1169,88 @@ static std::shared_ptr<TextComponent> gcmV3Value(
     );
 }
 
+// 61TJ: while a game's UPDATES or DLC value says ASSESSING, re-read the summary every 2 seconds in
+// the background (never on the drawing thread) and show the result as soon as the check finishes.
+static bool gcmV78Waiting(const std::string& value)
+{
+    return value.find("ASSESSING") != std::string::npos;
+}
+
+struct GcmV78SummaryPoll
+{
+    std::atomic<bool> stopped{false};
+    std::atomic<bool> busy{false};
+    std::mutex mutex;
+    bool ready = false;
+    GcmV3Summary result;
+};
+
+class GcmV78LiveSummaryValue : public TextComponent
+{
+public:
+    GcmV78LiveSummaryValue(Window* window, const std::string& rom, const std::string& emulator,
+                           const std::string& value, const std::shared_ptr<TextComponent>& partner)
+        : TextComponent(window, value, ThemeData::getMenuTheme()->Text.font, ThemeData::getMenuTheme()->Text.color),
+          mRom(rom), mEmulator(emulator), mPartner(partner), mPoll(std::make_shared<GcmV78SummaryPoll>()),
+          mLast(std::chrono::steady_clock::now()) {}
+    ~GcmV78LiveSummaryValue() override { mPoll->stopped.store(true); }
+    void update(int deltaTime) override { TextComponent::update(deltaTime); tick(); }
+    void render(const Transform4x4f& parentTrans) override { tick(); TextComponent::render(parentTrans); }
+
+private:
+    void tick()
+    {
+        {
+            std::lock_guard<std::mutex> lock(mPoll->mutex);
+            if (mPoll->ready)
+            {
+                mPoll->ready = false;
+                // A failed read returns UNKNOWN; keep the waiting text and try again.
+                if (mPoll->result.update != "UNKNOWN" || mPoll->result.dlc != "UNKNOWN")
+                {
+                    if (auto partner = mPartner.lock()) partner->setText(mPoll->result.update);
+                    setText(mPoll->result.dlc);
+                }
+            }
+        }
+        auto partner = mPartner.lock();
+        if (!gcmV78Waiting(getValue()) && !(partner && gcmV78Waiting(partner->getValue())))
+            return;
+        const auto now = std::chrono::steady_clock::now();
+        if (mPoll->busy.load() || now - mLast < std::chrono::milliseconds(2000))
+            return;
+        mLast = now;
+        mPoll->busy.store(true);
+        const auto poll = mPoll;
+        const std::string rom = mRom, emulator = mEmulator;
+        std::thread([poll, rom, emulator]()
+        {
+            GcmV3Summary result;
+            try { result = gcmV3ReadSummary(rom, emulator); }
+            catch (const std::exception& error) { gcmV75Log("GCM live summary", error.what()); }
+            if (!poll->stopped.load())
+            {
+                std::lock_guard<std::mutex> lock(poll->mutex);
+                poll->result = result;
+                poll->ready = true;
+            }
+            poll->busy.store(false);
+        }).detach();
+    }
+
+    std::string mRom, mEmulator;
+    std::weak_ptr<TextComponent> mPartner;
+    std::shared_ptr<GcmV78SummaryPoll> mPoll;
+    std::chrono::steady_clock::time_point mLast;
+};
+
+// The DLC value drives the refresh for both values of the same game.
+static std::shared_ptr<TextComponent> gcmV78LiveSummary(Window* window, const std::string& rom,
+    const std::string& emulator, const std::string& value, const std::shared_ptr<TextComponent>& partner)
+{
+    return std::make_shared<GcmV78LiveSummaryValue>(window, rom, emulator, value, partner);
+}
+
 
 
 // GCM v3.1: state can change only after confirmed backend success.

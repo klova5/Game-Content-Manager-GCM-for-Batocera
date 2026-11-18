@@ -3,7 +3,7 @@ import hashlib
 import importlib.util
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent
-PINS={'gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01.py': '5fac20ba0f9b73c68451a32147790af85f99c061a8a52f510a1eb2a9078b1bbe', 'gcm-global-install-locally-v01.py': '58043a4915c5c0890bdd061935bad7d6e2c4070f27e65a86e9b6b93f029eb2b2'}
+PINS={'gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01.py': '3e7bc89f31bb1f18adc28811d177fa05781150d06c713ef7e3eecad17dbd6dd0', 'gcm-global-install-locally-v01.py': '58043a4915c5c0890bdd061935bad7d6e2c4070f27e65a86e9b6b93f029eb2b2'}
 
 def load(name):
     path=ROOT/name

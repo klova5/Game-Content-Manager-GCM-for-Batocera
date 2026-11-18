@@ -27,7 +27,7 @@ def dependencies():
     adapter = load("ryujinx-native-adapter.py",
         "dbf3498d04fb0d38a2c0ed09b5fc34bd6943a7bfec80b8ede2e78351085f1141")
     operations = load("ryujinx-global-backend.py",
-        "701fe33d5d7ac6b8195261240bd794e9ea818888d0b34e24d589c681d8618fdb")
+        "d84eb9c888ab6b8b9f8a6986a1c52236a41b55de9523603bc33daefb7287271d")
     index = load("gcm-switch-managed-index.py",
         "086321dbd71878064044445ada98d7d80f2ae6f482b425e099eca0f146545772")
     return copier, integrity, adapter, operations, index
@@ -129,7 +129,7 @@ def install(rom, token, content_type, confirmed=False):
 
     copier, integrity, adapter, operations, index = dependencies()
     transaction = load("ryujinx-content-registration.py",
-        "656d7b8ddd749424aa5a7cfab8d71c3a0147d8dcf2cf1af33cf5d5577692e7ed")
+        "b513dd6c6939f810cb11d48231f3dca0c252306c7ebc2a30a6600437b2c3726d")
     state = ROOT / "state"
     lockpath = state / "ryujinx-install.lock"
     if state.is_symlink() or lockpath.is_symlink():

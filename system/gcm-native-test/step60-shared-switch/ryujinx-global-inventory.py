@@ -74,7 +74,7 @@ def query(rom, content_type):
         for item in game["records"] if item["content_type"] == content_type
     }
     shared = load("gcm-switch-candidate-cache.py",
-        "574e84a4d3350fc4c2e5c3da805892a4a6200ef4ff54559dfaabe0db529e5fe6")
+        "9808ccea265f2232675d98734b6235d7eea574e7cb200041728b7db12ead0b29")
     candidates = shared.candidates(rom, content_type)
     if candidates["application_id"] != game["native_snapshot"]["application_id"]:
         raise ValueError("Native and shared game identities disagree")

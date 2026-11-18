@@ -3,7 +3,7 @@ import hashlib
 import importlib.util
 from pathlib import Path
 ROOT=Path(__file__).resolve().parent
-PINS={'gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py': '77b5e60766957cb015ea2b09e619a8b9f443fdcb54c62a3ca6806b0309c15ce5', 'gcm-global-install-locally-v01.py': '58043a4915c5c0890bdd061935bad7d6e2c4070f27e65a86e9b6b93f029eb2b2'}
+PINS={'gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py': 'fb7b8d5a6d0fcfde47e93e63f5bb4c3a894009c48cfaf7c5011dc3a4cde087e7', 'gcm-global-install-locally-v01.py': '58043a4915c5c0890bdd061935bad7d6e2c4070f27e65a86e9b6b93f029eb2b2'}
 
 _GCM_DECLARED_CODE_NAMES = {'gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01-space-v01.py': 'gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py', 'gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01.py': 'gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py'}
 

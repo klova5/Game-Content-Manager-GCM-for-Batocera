@@ -4,8 +4,8 @@ import hashlib, importlib.util, runpy, sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-INPLACE = (HERE / 'gcm-switch-dlc-inplace-v02.py', '1bde68699c69213949604e45907195500010aae4561fa95ae725baa646447f6a')
-MENU = (HERE.parent / 'gcm-global-menu-existing-v01.py', 'ceded0b0b6376fa584ccc69691cbaa6e435c2de98ce4728c7e60eaa1b69fae73')
+INPLACE = (HERE / 'gcm-switch-dlc-inplace-v02.py', '3561294a91c2b7740c72aa1b3ed03d0fa87fedffeebf74e8f73e389976b8d072')
+MENU = (HERE.parent / 'gcm-global-menu-existing-v01.py', '6f0840ec42e4e2445804df30e4f6e145f807560cb992d2894a9696db2c411a47')
 
 
 def pinned(path, expected):
