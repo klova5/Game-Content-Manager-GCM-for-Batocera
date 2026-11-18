@@ -26,9 +26,9 @@ storage and external drives, without touching your original files.
 - **Copy to GCM** keeps a GCM-managed copy of a Switch update or DLC (optional; Switch registers in place).
 - Works with exFAT/FAT external drives (stable file identity even though those drives have no file numbers).
 
-## Changes since v3.6-preview-2
+## Changes in developer preview 3
 
-These are in the source here and will be in the next release zip. All are running on the author's device except the self-updating `ASSESSING` value, which needs the frontend rebuild.
+Release `GCM-v3.6-preview-3` (5.4 MB). Tested on the Batocera v44 beta of Nov 16 2026.
 
 - **Batocera v44 beta (61TI):** GCM falls back to whatever frontend Batocera ships, so a Batocera update no
   longer stops GCM from starting (it only refuses if something is mounted over the standard frontend).
@@ -38,18 +38,18 @@ These are in the source here and will be in the next release zip. All are runnin
   UPDATES and DLC showed UNKNOWN ("multiple indistinguishable active update registrations").
 - **PS4 (61TJ):** while GCM checks a game's update and DLC files the menu says `ASSESSING` (was
   `UNASSESSED`), `CHECK FAILED` if the check fails, and `NOT RECOGNISED` for DLC folders it cannot
-  identify. The frontend change that makes `ASSESSING` update by itself is in `GuiGcmNative.h` and
-  `GuiMenu-GCM.md`; it needs a frontend rebuild and is not in a release yet.
+  identify. The value updates by itself when the check finishes (frontend change in `GuiGcmNative.h` and
+  `GuiMenu-GCM.md`).
 
 ## Install
 
-Download `gcm-v3.6-preview-2-batocera44-x86_64.zip` from this repository's
+Download `gcm-v3.6-preview-3-batocera44-x86_64.zip` from this repository's
 [Releases](https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera/releases), copy it to
 `/userdata/system` on the Batocera device, then from Batocera's terminal (or an SSH session on the device):
 
 ```bash
 cd /userdata/system
-unzip gcm-v3.6-preview-2-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v3.6-preview-2-batocera44-x86_64.zip .
+unzip gcm-v3.6-preview-3-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v3.6-preview-3-batocera44-x86_64.zip .
 cd gcm-v3.6-preview
 bash install.sh --check     # only checks the device; writes nothing
 bash install.sh --start     # installs and switches to GCM v3.6 (and at every boot)
