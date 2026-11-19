@@ -11,7 +11,7 @@ storage and external drives, without touching your original files.
 
 | | |
 |---|---|
-| Batocera | **44**, x86_64 (tested on the July 2026 dev build and the Nov 16 2026 beta) |
+| Batocera | **44** stable, x86_64 |
 | Nintendo Switch | Ryujinx, Citron (updates and DLC) |
 | PlayStation 4 | shadPS4 (updates and DLC) |
 | Other systems | RPCS3, Cemu, Vita3K and others: update management (varies by system) |
@@ -26,6 +26,14 @@ storage and external drives, without touching your original files.
 - **Copy to GCM** keeps a GCM-managed copy of a Switch update or DLC (optional; Switch registers in place).
 - Works with exFAT/FAT external drives (stable file identity even though those drives have no file numbers).
 
+## Changes in developer preview 4 (upcoming)
+
+- **Frontend rebuilt on Batocera v44 stable's EmulationStation** (commit `04b2a9e`, with Batocera's own v44
+  patches and build options). GCM's frontend now matches Batocera's: the v44 menu options, the power-button
+  shutdown through EmulationStation, PulseAudio sound, text-to-speech and the x86_64-only options
+  (e.g. *Hide EmulationStation when running a game*). Earlier previews used the July 2026 source.
+- How to build it: [`emulationstation/BUILD.md`](emulationstation/BUILD.md).
+
 ## Changes in developer preview 3
 
 Release `GCM-v3.6-preview-3` (5.4 MB). Tested on the Batocera v44 beta of Nov 16 2026.
@@ -39,7 +47,7 @@ Release `GCM-v3.6-preview-3` (5.4 MB). Tested on the Batocera v44 beta of Nov 16
 - **PS4 (61TJ):** while GCM checks a game's update and DLC files the menu says `ASSESSING` (was
   `UNASSESSED`), `CHECK FAILED` if the check fails, and `NOT RECOGNISED` for DLC folders it cannot
   identify. The value updates by itself when the check finishes (frontend change in `GuiGcmNative.h` and
-  `GuiMenu-GCM.md`).
+  `gcm-emulationstation.patch`).
 
 ## Install
 
@@ -101,14 +109,14 @@ The GCM frontend in the release zip is a build of Batocera's EmulationStation an
 | Folder | Contents |
 |---|---|
 | `system/` | The GCM tools exactly as installed under `/userdata/system` (Python; the menu calls them) |
-| `emulationstation/` | GCM's menu: `es-app/src/guis/GuiGcmNative.h`, compiled into Batocera's EmulationStation |
+| `emulationstation/` | GCM's menu (`es-app/src/guis/GuiGcmNative.h`), its patch to Batocera's EmulationStation, and `BUILD.md` |
 | `installer/` | `install.sh`, `uninstall.sh` and `gcm_install.py`, as shipped in the release zip |
 | `tests/` | Offline fixtures: `bash tests/run_tests.sh` (Python 3; g++ for the frontend test) |
 | `tools/` | `repin.py`: after editing files in `system/`, updates every checksum that pins them |
 
 The release zip also contains the prebuilt GCM frontend (Batocera EmulationStation with GCM's menu),
-built for Batocera 44 x86_64. Besides `GuiGcmNative.h`, the build adds one block to Batocera's `GuiMenu.cpp`:
-see [`GuiMenu-GCM.md`](emulationstation/es-app/src/guis/GuiMenu-GCM.md). See [NOTICE.md](NOTICE.md) for its licence.
+built for Batocera 44 x86_64. How it is built from Batocera's EmulationStation, GCM's header and
+[`gcm-emulationstation.patch`](emulationstation/gcm-emulationstation.patch): [`emulationstation/BUILD.md`](emulationstation/BUILD.md). See [NOTICE.md](NOTICE.md) for its licence.
 
 Tools find and verify each other by exact path and SHA-256: editing a file in `system/` makes the tools
 that pin it refuse to run until their pins are updated. `tools/repin.py` does that:

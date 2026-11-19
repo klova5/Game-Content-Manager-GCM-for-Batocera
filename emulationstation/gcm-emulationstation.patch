@@ -1,0 +1,75 @@
+--- a/es-app/src/guis/GuiGameOptions.cpp
++++ b/es-app/src/guis/GuiGameOptions.cpp
+@@ -422,7 +422,8 @@
+ 
+ 			if (game->getType() != FOLDER)
+ 			{
+-				if (srcSystem->hasFeatures() || srcSystem->hasEmulatorSelection())
++				if (srcSystem->hasFeatures() || srcSystem->hasEmulatorSelection() ||
++				    srcSystem->getName() == "ps3" || srcSystem->getName() == "ps4")
+ 				{
+ 					mHasAdvancedGameOptions = true;
+ 					mMenu.addEntry(_("ADVANCED GAME OPTIONS"), false, [this, game]
+--- a/es-app/src/guis/GuiMenu.cpp
++++ b/es-app/src/guis/GuiMenu.cpp
+@@ -1,4 +1,5 @@
+ #include "guis/GuiMenu.h"
++#include "guis/GuiGcmNative.h"
+ 
+ #include "components/OptionListComponent.h"
+ #include "components/SliderComponent.h"
+@@ -5062,6 +5063,54 @@
+ 
+ 	auto customFeatures = systemData->getCustomFeatures(currentEmulator, currentCore);
+ 
++// Game Content Manager v3 - native Advanced Game Options
++#ifndef WIN32
++if (fileData != nullptr &&
++    (systemData->getName() == "switch" || systemData->getName() == "ps3" ||
++     systemData->getName() == "ps4" || systemData->getName() == "wiiu" ||
++     systemData->getName() == "psvita" || systemData->getName() == "xbox360" ||
++     systemData->getName() == "3ds" || systemData->getName() == "wii" ||
++     systemData->getName() == "psp"))
++{
++    auto source = fileData->getSourceFileData();
++    if (source != nullptr &&
++        !(systemData->getName() == "ps4" &&
++          (Utils::FileSystem::getFileName(source->getPath()) == "DLC.sh" ||
++           Utils::FileSystem::getFileName(source->getPath()) == "images.sh")))
++    {
++        const std::string rom = source->getPath();
++        std::string emulator = currentEmulator;
++        if (emulator.empty() || emulator == "auto") emulator = source->getEmulator(true);
++        if (emulator.empty() || emulator == "auto") emulator = systemData->getEmulator(true);
++        const auto systemName = systemData->getName();
++        if (systemName == "ps3") emulator = "rpcs3";
++        else if (systemName == "ps4") emulator = "shadps4";
++        else if (systemName == "wiiu") emulator = "cemu";
++        else if (systemName == "psvita") emulator = "vita3k";
++        else if (systemName == "3ds") emulator = emulator == "libretro" ? "azahar-libretro" : "azahar";
++        else if (systemName == "wii") emulator = "dolphin";
++        else if (systemName == "psp") emulator = "ppsspp";
++        else if (systemName == "xbox360" && (emulator.empty() || emulator == "auto")) emulator = "xenia";
++        if (emulator.rfind("nextendo", 0) != 0 && emulator != "xemu")
++        {
++            const GcmV3Summary summary = gcmV3ReadSummary(rom, emulator);
++            auto updateValue = gcmV3Value(mWindow, summary.update);
++            auto dlcValue = gcmV78LiveSummary(mWindow, rom, emulator, summary.dlc, updateValue);
++            const std::function<void()> refresh = [rom, emulator, updateValue, dlcValue]
++            {
++                const GcmV3Summary current = gcmV3ReadSummary(rom, emulator);
++                updateValue->setText(current.update);dlcValue->setText(current.dlc);
++            };
++            systemConfiguration->addWithLabel(_("UPDATES"), updateValue, false,
++                [mWindow, rom, emulator, refresh] { gcmV3OpenPage(mWindow, rom, emulator, "update", refresh); });
++            systemConfiguration->addWithLabel(_("DLC"), dlcValue, false,
++                [mWindow, rom, emulator, refresh] { gcmV3OpenPage(mWindow, rom, emulator, "dlc", refresh); });
++        }
++    }
++}
++#endif
++
++
+ 	// Screen ratio choice
+ 	if (systemData->isFeatureSupported(currentEmulator, currentCore, EmulatorFeatures::ratio))
+ 	{
