@@ -26,7 +26,10 @@ storage and external drives, without touching your original files.
 - **Copy to GCM** keeps a GCM-managed copy of a Switch update or DLC (optional; Switch registers in place).
 - Works with exFAT/FAT external drives (stable file identity even though those drives have no file numbers).
 
-## Changes in developer preview 4 (upcoming)
+## Changes in developer preview 4
+
+Release `GCM-v3.6-preview-4` (5.7 MB), for Batocera 44 stable.
+
 
 - **Frontend rebuilt on Batocera v44 stable's EmulationStation** (commit `04b2a9e`, with Batocera's own v44
   patches and build options). GCM's frontend now matches Batocera's: the v44 menu options, the power-button
@@ -51,13 +54,13 @@ Release `GCM-v3.6-preview-3` (5.4 MB). Tested on the Batocera v44 beta of Nov 16
 
 ## Install
 
-Download `gcm-v3.6-preview-3-batocera44-x86_64.zip` from this repository's
+Download `gcm-v3.6-preview-4-batocera44-x86_64.zip` from this repository's
 [Releases](https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera/releases), copy it to
 `/userdata/system` on the Batocera device, then from Batocera's terminal (or an SSH session on the device):
 
 ```bash
 cd /userdata/system
-unzip gcm-v3.6-preview-3-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v3.6-preview-3-batocera44-x86_64.zip .
+unzip gcm-v3.6-preview-4-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v3.6-preview-4-batocera44-x86_64.zip .
 cd gcm-v3.6-preview
 bash install.sh --check     # only checks the device; writes nothing
 bash install.sh --start     # installs and switches to GCM v3.6 (and at every boot)
