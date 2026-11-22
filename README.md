@@ -11,7 +11,7 @@ storage and external drives, without touching your original files.
 
 | | |
 |---|---|
-| Batocera | **44** stable, x86_64 |
+| Batocera | **44** stable, x86_64 (Xorg) and x86-64-v3 (Wayland/LabWC) |
 | Nintendo Switch | Ryujinx, Citron (updates and DLC) |
 | PlayStation 4 | shadPS4 (updates and DLC) |
 | Other systems | RPCS3, Cemu, Vita3K and others: update management (varies by system) |
@@ -25,6 +25,13 @@ storage and external drives, without touching your original files.
   packages on internal and external drives are never deleted. Uninstalled items return to Detected.
 - **Copy to GCM** keeps a GCM-managed copy of a Switch update or DLC (optional; Switch registers in place).
 - Works with exFAT/FAT external drives (stable file identity even though those drives have no file numbers).
+
+## Not yet released
+
+- **Batocera x86-64-v3 (Wayland) image:** the permanent supervisor now starts the GCM frontend inside
+  the stock frontend's Wayland session (`WAYLAND_DISPLAY`, SDL/Qt Wayland settings) instead of forcing
+  an Xorg display and cookie. On the x86_64 (Xorg) image nothing changes. Tested on a box migrated from
+  x86_64 to x86-64-v3 on v44 stable; covered by `tests/test_supervisor_wayland.py`.
 
 ## Changes in developer preview 4
 
@@ -95,7 +102,9 @@ Games, saves and emulator settings are never removed.
 
 ## Known limitations
 
-- Built for Batocera 44 x86_64 only; other versions are refused by the installer.
+- Built for Batocera 44 on 64-bit PCs (the x86_64 and x86-64-v3 images); other versions and
+  architectures are refused by the installer. On x86-64-v3 the supervisor change above is needed
+  (not yet in a release zip).
 - Folder names still carry development history (`/userdata/system/gcm-native-test/...`): hundreds of
   files locate and verify each other by exact path and checksum, so they are kept as they are for now.
 - Citron loads every update/DLC file in its folders: an update or DLC that is *your own file* in one of

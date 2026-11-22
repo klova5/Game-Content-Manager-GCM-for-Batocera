@@ -63,6 +63,17 @@ def live_x_cookie():
     return None
 
 
+BOARD_FILE = Path("/boot/boot/batocera.board")
+
+
+def wayland_board():
+    """True on Batocera's x86-64-v3 image (Wayland/LabWC; X11 apps go through Xwayland)."""
+    try:
+        return BOARD_FILE.read_text().strip() == "x86-64-v3"
+    except OSError:
+        return False
+
+
 def x_authority(current):
     """Keep a working cookie; otherwise /.Xauthority if present; otherwise the running X server's cookie."""
     if current and Path(current).is_file():
@@ -168,14 +179,23 @@ def graphical_environment(pid):
         "DISPLAY", "XAUTHORITY", "XDG_RUNTIME_DIR",
         "LANG", "LC_ALL", "PATH", "SDL_VIDEODRIVER",
         "DRI_PRIME",
+        # Wayland session (x86-64-v3 image / LabWC)
+        "WAYLAND_DISPLAY", "XDG_SESSION_TYPE", "XDG_CURRENT_DESKTOP",
+        "SDL_VIDEO_DRIVER", "QT_QPA_PLATFORM",
     ):
         if key in original:
             environment[key] = original[key]
 
     environment["HOME"] = "/userdata/system"
-    environment.setdefault("DISPLAY", ":0")
-    environment["XAUTHORITY"] = x_authority(environment.get("XAUTHORITY"))
     environment.setdefault("XDG_RUNTIME_DIR", "/var/run")
+    if wayland_board() and not environment.get("WAYLAND_DISPLAY"):
+        sockets = sorted(Path(environment["XDG_RUNTIME_DIR"]).glob("wayland-[0-9]"))
+        if sockets:
+            environment["WAYLAND_DISPLAY"] = sockets[0].name
+    if not environment.get("WAYLAND_DISPLAY"):
+        # Xorg (x86_64 image): unchanged behaviour
+        environment.setdefault("DISPLAY", ":0")
+        environment["XAUTHORITY"] = x_authority(environment.get("XAUTHORITY"))
 
     environment.pop("LD_TRACE_LOADED_OBJECTS", None)
     environment.pop("LD_LIBRARY_PATH", None)
