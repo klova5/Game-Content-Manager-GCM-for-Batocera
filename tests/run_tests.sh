@@ -5,6 +5,7 @@ cd "$(dirname "$0")/.."
 SYS=system; PERM=$SYS/add-ons/game-content-manager/v36-permanent
 python3 -B tests/test_supervisor_shutdown.py "$PERM/gcm-v36-permanent-supervisor.py"
 python3 -B tests/test_supervisor_v44.py "$PERM/gcm-v36-permanent-supervisor.py"
+python3 -B tests/test_supervisor_wayland.py "$PERM/gcm-v36-permanent-supervisor.py"
 python3 -B tests/test_boot_worker.py "$PERM/gcm-v36-boot-wait.py"
 python3 -B tests/test_citron_update_resolution.py "$SYS/gcm-native-test/step60-shared-switch/citron-update-resolution.py"
 python3 -B tests/test_ps4_summary.py "$SYS/gcm-native-test/step61-common-content/gcm-global-menu-unified-v02-prepared-action-v01-file-reuse-v01-item-progress-v01-switch-routes-v01-lifecycle-v01-space-v01-lookup-v01.py"
