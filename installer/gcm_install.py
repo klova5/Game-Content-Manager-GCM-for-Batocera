@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""GCM (Game Content Manager) v3.6 developer preview: install / uninstall on Batocera 44 (x86_64).
+"""GCM (Game Content Manager) 4.0 developer preview: install / uninstall on Batocera 44 (x86_64).
 
   install.sh            check the device, then install GCM (asks before switching the frontend)
   install.sh --check    only check; nothing is written
-  install.sh --start    install and switch to GCM v3.6 right away (also starts it at every boot)
+  install.sh --start    install and switch to GCM 4.0 right away (also starts it at every boot)
   uninstall.sh          return to the standard frontend and remove GCM's program files
   uninstall.sh --purge  also remove GCM's state and the GCM-managed copies in /userdata/system/game-content
 
@@ -129,7 +129,7 @@ def install():
     patch(supervisor, r'(V36_SHA = ")([0-9a-f]{64})(")', front_sha)
     patch(boot, r'(EXPECTED = ")([0-9a-f]{64})(")', front_sha)
     (V36 / 'deployment.json').write_text(json.dumps({
-        'version': '3.6', 'build': manifest['build'], 'binary': '/userdata/system/add-ons/game-content-manager/v36-permanent/emulationstation-gcm-v36',
+        'version': '4.0', 'build': manifest['build'], 'binary': '/userdata/system/add-ons/game-content-manager/v36-permanent/emulationstation-gcm-v36',
         'binary_sha256': front_sha, 'supervisor_sha256': sha(supervisor), 'runtime': manifest['runtime'],
         'timeout_enabled': False, 'fallback': 'Original Batocera EmulationStation', 'startup_service': 'GCMV36',
         'installed': time.strftime('%Y-%m-%d %H:%M:%S'), 'standard_frontend_sha256': std_sha}, indent=2) + '\n')
@@ -140,13 +140,13 @@ def install():
         (SYSTEM / d).mkdir(parents=True, exist_ok=True)
     RECORD.write_text(json.dumps({'build': manifest['build'], 'files': written + ['add-ons/game-content-manager/v36-permanent/emulationstation-gcm-v36',
                                   'add-ons/game-content-manager/v36-permanent/deployment.json']}, indent=1) + '\n')
-    say('PASS: GCM v3.6 %s installed (%d files)' % (manifest['build'], len(written)))
+    say('PASS: GCM 4.0 %s installed (%d files)' % (manifest['build'], len(written)))
     switch = V36 / 'gcm-frontend-switch.py'
     if '--start' in sys.argv and 'GCM_TARGET_ROOT' not in os.environ:
-        say('Switching to GCM v3.6 (the screen goes to the standard frontend and back, about 1-2 minutes)...')
+        say('Switching to GCM 4.0 (the screen goes to the standard frontend and back, about 1-2 minutes)...')
         raise SystemExit(subprocess.run([sys.executable, '-B', str(switch), 'v36']).returncode)
     shown = '/' + switch.relative_to(TARGET).as_posix()
-    say('Start GCM v3.6 now and at every boot with:  python3 %s v36' % shown)
+    say('Start GCM 4.0 now and at every boot with:  python3 %s v36' % shown)
     say('Back to the standard frontend any time with: python3 %s v34' % shown)
 
 

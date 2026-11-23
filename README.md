@@ -1,4 +1,4 @@
-# GCM – Game Content Manager for Batocera (v3.6 developer preview)
+# GCM – Game Content Manager for Batocera (4.0 developer preview)
 
 GCM adds a **Game Content Manager** to Batocera's game menu (Advanced Game Options) and main menu. It finds,
 verifies, installs, enables and uninstalls **updates and DLC** for each game, from your internal
@@ -27,9 +27,11 @@ storage and external drives, without touching your original files.
 - **Copy to GCM** keeps a GCM-managed copy of a Switch update or DLC (optional; Switch registers in place).
 - Works with exFAT/FAT external drives (stable file identity even though those drives have no file numbers).
 
-## Changes in developer preview 5
+## Changes in 4.0 developer preview 1
 
-Release `GCM-v3.6-preview-5`, for Batocera 44 stable.
+Release `GCM-v4.0-preview-1`, for Batocera 44 stable. A big enough update to start version 4.0 (it was
+planned as v3.6 developer preview 5); internal names such as `v36-permanent` and the `GCMV36` service stay
+as they are, so earlier previews update in place.
 
 - **Switch 2 (Lichii):** updates and DLC for games stored as `.nup` files, on the same Detected / Available
   pages as the other consoles. GCM writes them into the game file with its own NUP tool
@@ -82,16 +84,16 @@ Release `GCM-v3.6-preview-3` (5.4 MB). Tested on the Batocera v44 beta of Nov 16
 
 ## Install
 
-Download `gcm-v3.6-preview-5-batocera44-x86_64.zip` from this repository's
+Download `gcm-v4.0-preview-1-batocera44-x86_64.zip` from this repository's
 [Releases](https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera/releases), copy it to
 `/userdata/system` on the Batocera device, then from Batocera's terminal (or an SSH session on the device):
 
 ```bash
 cd /userdata/system
-unzip gcm-v3.6-preview-5-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v3.6-preview-5-batocera44-x86_64.zip .
-cd gcm-v3.6-preview
+unzip gcm-v4.0-preview-1-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v4.0-preview-1-batocera44-x86_64.zip .
+cd gcm-v4.0-preview
 bash install.sh --check     # only checks the device; writes nothing
-bash install.sh --start     # installs and switches to GCM v3.6 (and at every boot)
+bash install.sh --start     # installs and switches to GCM (and at every boot)
 ```
 
 `bash install.sh` without `--start` installs without switching; it prints the command to switch later.
