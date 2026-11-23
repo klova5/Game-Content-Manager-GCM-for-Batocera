@@ -17,8 +17,10 @@ it is built from the **same source and patches as Batocera v44 stable's frontend
    - copy [`es-app/src/guis/GuiGcmNative.h`](es-app/src/guis/GuiGcmNative.h) into the same folder;
    - apply [`gcm-emulationstation.patch`](gcm-emulationstation.patch) with `patch -p1`. It includes
      `GuiGcmNative.h` in `GuiMenu.cpp`, adds the **UPDATES** and **DLC** rows to a game's Advanced Game
-     Options (`GuiMenu::popSpecificConfigurationGui`, before *Screen ratio choice*), and shows Advanced
-     Game Options for PS3 and PS4 games (`GuiGameOptions.cpp`).
+     Options (`GuiMenu::popSpecificConfigurationGui`, before *Screen ratio choice*) for the consoles GCM
+     manages (Switch 2 included), routes emulators the GCM scanner found compatible to their family's
+     backend (e.g. Eden to Citron), adds **GAME CONTENT MANAGER** to the main menu (above *System
+     settings*), and shows Advanced Game Options for PS3 and PS4 games (`GuiGameOptions.cpp`).
 
 ## Build
 

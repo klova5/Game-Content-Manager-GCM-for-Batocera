@@ -18,7 +18,17 @@
  
  #include "components/OptionListComponent.h"
  #include "components/SliderComponent.h"
-@@ -5062,6 +5063,54 @@
+@@ -212,6 +213,9 @@
+ 			ApiSystem::getInstance()->isScriptingSupported(ApiSystem::UPGRADE))
+ 			addEntry(_("UPDATES & DOWNLOADS"), true, [this] { openUpdatesSettings(); }, "iconUpdates");
+ 
++#ifndef WIN32
++		addEntry(_("GAME CONTENT MANAGER").c_str(), true, [this] { gcmV81OpenReport(mWindow, _("GAME CONTENT MANAGER"), "summary"); }, "iconGames");
++#endif
+ 		addEntry(_("SYSTEM SETTINGS").c_str(), true, [this] { openSystemSettings(); }, "iconSystem");
+ 	}
+ 	else
+@@ -5062,6 +5066,56 @@
  
  	auto customFeatures = systemData->getCustomFeatures(currentEmulator, currentCore);
  
@@ -29,7 +39,7 @@
 +     systemData->getName() == "ps4" || systemData->getName() == "wiiu" ||
 +     systemData->getName() == "psvita" || systemData->getName() == "xbox360" ||
 +     systemData->getName() == "3ds" || systemData->getName() == "wii" ||
-+     systemData->getName() == "psp"))
++     systemData->getName() == "psp" || systemData->getName() == "switch2"))
 +{
 +    auto source = fileData->getSourceFileData();
 +    if (source != nullptr &&
@@ -49,7 +59,9 @@
 +        else if (systemName == "3ds") emulator = emulator == "libretro" ? "azahar-libretro" : "azahar";
 +        else if (systemName == "wii") emulator = "dolphin";
 +        else if (systemName == "psp") emulator = "ppsspp";
++        else if (systemName == "switch2" && emulator != "lichii-366") emulator = "lichii";
 +        else if (systemName == "xbox360" && (emulator.empty() || emulator == "auto")) emulator = "xenia";
++        emulator = gcmV79RouteEmulator(systemName, emulator);
 +        if (emulator.rfind("nextendo", 0) != 0 && emulator != "xemu")
 +        {
 +            const GcmV3Summary summary = gcmV3ReadSummary(rom, emulator);

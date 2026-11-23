@@ -21,6 +21,7 @@
 #include <stdexcept>
 #include <thread>
 #include <utility>
+#include <rapidjson/document.h>
 #include <memory>
 
 // 61TA/61TC/61TD/61TF: GCM Python tools load the read profiler, proof reuse (with add-ons) and exFAT-stable file identity through
@@ -299,16 +300,29 @@ static bool gcmV63IsExtraProvider(const std::string& emulator)
         || emulator == "ppsspp" || emulator == "PPSSPP";
 }
 
+// 61TP: Switch 2 (Lichii) uses the shared folder-console pages, served by GCM's Switch 2 backend.
+static bool gcmV80IsSwitch2(const std::string& emulator)
+{
+    return emulator == "lichii" || emulator == "lichii-366";
+}
+
+static std::string gcmV80NativeScript(const std::string& emulator)
+{
+    return gcmV80IsSwitch2(emulator)
+        ? "/userdata/system/add-ons/game-content-manager/switch2/gcm-switch2-backend.py"
+        : "/userdata/system/gcm-native-test/step61-common-content/beta-native-folder-batch-v06/gcm-native-folder-batch-v01.py";
+}
+
 static std::string gcmV63ScanJobPath(const std::string& emulator)
 {
     return gcmV63IsExtraProvider(emulator)
         ? "/userdata/system/gcm-native-test/step61-common-content/beta-global-update-v01/gcm-global-update-jobs-v01.py"
-        : "/userdata/system/gcm-native-test/step61-common-content/beta-native-folder-batch-v06/gcm-native-folder-batch-v01.py";
+        : gcmV80NativeScript(emulator);
 }
 
 static bool gcmV61IsNativeFolder(const std::string& emulator)
 {
-    return emulator == "rpcs3" || emulator == "cemu" || emulator == "vita3k";
+    return emulator == "rpcs3" || emulator == "cemu" || emulator == "vita3k" || gcmV80IsSwitch2(emulator);
 }
 
 static bool gcmV61UsesGlobalContentMenu(const std::string& emulator)
@@ -331,7 +345,7 @@ static std::string gcmV3Run(
             gcmV63IsExtraProvider(emulator)
                 ? "/userdata/system/gcm-native-test/step61-common-content/beta-global-update-v01/gcm-global-update-workflow-v01.py"
                 : gcmV61IsNativeFolder(emulator)
-                ? "/userdata/system/gcm-native-test/step61-common-content/beta-native-folder-batch-v06/gcm-native-folder-batch-v01.py"
+                ? gcmV80NativeScript(emulator)
                 : gcmV36IsSharedSwitch(emulator)
                 ? "/userdata/system/gcm-native-test/"
                   "step61-common-content/beta-switch-dlc-inplace-v02/gcm-switch-fresh-menu-v02.py"
@@ -617,7 +631,7 @@ static std::string gcmV35BatchRun(const std::string& rom,
         }
         if (kind != "update" && kind != "dlc") return "ERROR\tINVALID NATIVE CONTENT TYPE\n";
         std::string command = "python3 -B " + gcmV3Quote(
-            "/userdata/system/gcm-native-test/step61-common-content/beta-native-folder-batch-v06/gcm-native-folder-batch-v01.py")
+            gcmV80NativeScript(emulator))
             + " " + action + " --rom " + gcmV3Quote(rom)
             + " --emulator " + gcmV3Quote(emulator) + " --type " + gcmV3Quote(kind)
             + " --operation " + gcmV3Quote(operation) + " --tokens " + gcmV3Quote(selected);
@@ -924,6 +938,7 @@ static std::string gcmV61NativeCaption(const std::string& type, bool running)
     if (type.find(":enable:") != std::string::npos) return running ? _("APPLYING CHANGES") : _("SELECT");
     if (type.find(":disable:") != std::string::npos) return running ? _("APPLYING CHANGES") : _("ACTIVE");
     if (type.find(":recover:") != std::string::npos) return running ? _("RECOVERING") : _("RECOVER");
+    if (type.find(":forget:") != std::string::npos) return running ? _("REMOVING GCM COPY") : _("REMOVE GCM COPY");
     if (type.find(":uninstall:") != std::string::npos || type == "dlc-uninstall")
         return running ? _("UNINSTALLING") : _("UNINSTALL SELECTED ITEMS");
     if (type == "dlc-apply") return running ? _("APPLYING CHANGES") : _("APPLY CHANGES");
@@ -1063,6 +1078,44 @@ static std::string gcmV34TitleId(const std::string& rom)
     }
 
     return "";
+}
+
+// 61TN: an emulator the GCM scanner found "compatible" (it uses the same settings and storage as a backend
+// GCM has, e.g. Eden sharing Citron's folder) is handled by that backend. Anything else is unchanged.
+static const char* GCM_V79_REGISTRY = "/userdata/system/add-ons/game-content-manager/emulator-registry.json";
+
+static std::string gcmV79RouteEmulator(const std::string& system, const std::string& emulator)
+{
+    static const char* known[] = {"citron-emu", "ryujinx-emu", "shadps4", "rpcs3", "cemu", "vita3k",
+                                  "xenia", "azahar", "dolphin", "ppsspp"};
+    std::ifstream in(GCM_V79_REGISTRY);
+    if (!in || emulator.empty())
+        return emulator;
+    std::stringstream buffer;
+    buffer << in.rdbuf();
+    rapidjson::Document doc;
+    doc.Parse(buffer.str().c_str());
+    if (doc.HasParseError() || !doc.IsObject() || !doc.HasMember("schema") || !doc["schema"].IsString()
+        || std::string(doc["schema"].GetString()) != "GCM_EMULATOR_REGISTRY_V1"
+        || !doc.HasMember("emulators") || !doc["emulators"].IsArray())
+        return emulator;
+    for (const auto& entry : doc["emulators"].GetArray())
+    {
+        if (!entry.IsObject())
+            continue;
+        const auto text = [&entry](const char* key) -> std::string
+        {
+            return entry.HasMember(key) && entry[key].IsString() ? entry[key].GetString() : "";
+        };
+        if (text("system") != system || text("emulator") != emulator || text("status") != "compatible")
+            continue;
+        const std::string target = text("route_as");
+        for (const char* name : known)
+            if (target == name)
+                return target;
+        return emulator;
+    }
+    return emulator;
 }
 
 static GcmV3Summary gcmV3ReadSummary(
@@ -2176,6 +2229,7 @@ static std::string gcmV77CitronDlcMessage(const std::string& reply)
 static std::string gcmV65DeleteOverlay(const std::string& rom, const std::string& emulator,
     const std::string& kind, const std::string& output)
 {
+    if (gcmV80IsSwitch2(emulator)) return output;  // 61TP2: Switch 2 lists are complete as read
     static const char alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     std::string encoded;unsigned value = 0;int bits = -6;
     for (unsigned char c : output) { value = (value << 8) | c;bits += 8;while (bits >= 0) { encoded += alphabet[(value >> bits) & 63];bits -= 6; } }
@@ -2550,6 +2604,9 @@ static void gcmV61AddNativeItemRow(Window* window, GuiSettings* page,
         else if (row.state == "ACTIVE" || row.state == "ENABLED") actions.push_back({"disable", kind == "update" ? _("DEACTIVATE") : _("DISABLE")});
         else actions.push_back({"enable", _("ACTIVATE")});
         if (row.state != "FOLDER_PREPARED") actions.push_back({"uninstall", _("UNINSTALL")});
+        if (gcmV80IsSwitch2(emulator) && (row.state == "ACTIVE" || row.state == "ENABLED")
+            && row.label.find("(GCM copy kept)") != std::string::npos)
+            actions.push_back({"forget", _("REMOVE GCM COPY")});
     }
     auto label = std::make_shared<GcmV35BatchActionLabel>(window, rom, emulator,
         "native:" + actions.front().first + ":" + kind + ":" + row.token);
@@ -3080,7 +3137,7 @@ static void gcmV33OpenDlcPage(
             }
             const std::string capability = gcmV35RunTool(
                 "python3 -B " + gcmV3Quote(gcmV61IsNativeFolder(emulator)
-                    ? "/userdata/system/gcm-native-test/step61-common-content/beta-native-folder-batch-v06/gcm-native-folder-batch-v01.py"
+                    ? gcmV80NativeScript(emulator)
                     : "/userdata/system/gcm-native-test/step61-common-content/gcm-global-uninstall-v01.py")
                 + " capabilities --emulator " + gcmV3Quote(emulator));
             if (capability.find("CAPABILITY\tUNINSTALL_DLC\t1") == std::string::npos)
@@ -4322,7 +4379,7 @@ static void gcmV3OpenPage(
             : gcmV3Run(rom, emulator,
                        "--mode list --type " + gcmV3Quote(type));
 
-    if (type == "update")
+    if (type == "update" && !gcmV80IsSwitch2(emulator))
     {
         const auto retained = gcmV62UpdateRemovalRun(rom, emulator, "retained")
             + gcmV63ImportUpdateRun(rom, emulator, "list")
@@ -4982,7 +5039,7 @@ static void gcmV3OpenPage(
                 });
         });
 
-    if (type == "update" && page->markAction("uninstall"))
+    if (type == "update" && !gcmV80IsSwitch2(emulator) && page->markAction("uninstall"))
         gcmV34AddRightAction(window, page, _("UNINSTALL UPDATES"),
             [window, page, rom, emulator, type, refresh]()
             {
@@ -5316,5 +5373,108 @@ static void gcmV3OpenPage(
             );
     }
 
+    window->pushGui(page);
+}
+
+
+// 61TQ: GAME CONTENT MANAGER page (main menu). gcm-report.py sends the rows:
+//   GROUP <title> | ROW <label> <value> | PAGE <label> <value> <title> <args> | ACTION <label> <value> <question> <args>
+static const char* GCM_V81_REPORT = "/userdata/system/add-ons/game-content-manager/gcm-report.py";
+
+static std::string gcmV81Run(const std::string& args)
+{
+    std::string command = "python3 -B " + gcmV3Quote(GCM_V81_REPORT);
+    std::istringstream words(args);
+    std::string word;
+    while (words >> word)
+        command += " " + gcmV3Quote(word);
+    return gcmV35RunTool(command + " 2>&1");
+}
+
+static std::string gcmV81Text(const std::string& text)
+{
+    std::string result;
+    for (size_t i = 0; i < text.size(); ++i)
+    {
+        if (text[i] == '\\' && i + 1 < text.size() && text[i + 1] == 'n') { result += '\n'; ++i; }
+        else result += text[i];
+    }
+    return result;
+}
+
+static void gcmV81OpenReport(Window* window, const std::string& title, const std::string& args)
+{
+    const std::string output = gcmV81Run(args);
+    auto page = new GuiSettings(window, title.c_str());
+    std::istringstream input(output);
+    std::string line;
+    bool any = false;
+    while (std::getline(input, line))
+    {
+        std::vector<std::string> f;
+        std::istringstream fields(line);
+        std::string part;
+        while (std::getline(fields, part, '\t'))
+            f.push_back(part);
+        if (f.empty())
+            continue;
+        const std::string label = f.size() > 1 ? f[1] : "";
+        const std::string value = f.size() > 2 ? f[2] : "";
+        if (f[0] == "GROUP")
+        {
+            if (!label.empty()) page->addGroup(label);
+        }
+        else if (f[0] == "ROW")
+        {
+            page->addWithLabel(label, gcmV3Value(window, value));
+            any = true;
+        }
+        else if (f[0] == "ERROR")
+        {
+            page->addWithLabel(_("ERROR"), gcmV3Value(window, gcmV81Text(label)));
+            any = true;
+        }
+        else if (f[0] == "PAGE" && f.size() > 4)
+        {
+            const std::string subTitle = f[3], subArgs = f[4];
+            page->addWithLabel(label, gcmV3Value(window, value), false,
+                [window, subTitle, subArgs]() { gcmV81OpenReport(window, subTitle, subArgs); });
+            any = true;
+        }
+        else if (f[0] == "ACTION" && f.size() > 4)
+        {
+            const std::string question = gcmV81Text(f[3]), actionArgs = f[4];
+            const std::function<void()> handler = [window, page, title, args, question, actionArgs]()
+            {
+                window->pushGui(new GuiMsgBox(window, question, _("YES"),
+                    [window, page, title, args, actionArgs]()
+                    {
+                        window->pushGui(new GuiLoading<std::string>(window, _("WORKING..."),
+                            [actionArgs](IGuiLoadingHandler*) { return gcmV81Run(actionArgs); },
+                            [window, page, title, args](std::string reply)
+                            {
+                                std::string message;
+                                std::istringstream lines(reply);
+                                std::string l;
+                                while (std::getline(lines, l))
+                                    if (l.rfind("OK\t", 0) == 0 || l.rfind("ERROR\t", 0) == 0)
+                                    {
+                                        message = gcmV81Text(l.substr(l.find('\t') + 1));
+                                        break;
+                                    }
+                                if (message.empty()) message = _("NO ANSWER FROM GCM");
+                                page->close();
+                                gcmV81OpenReport(window, title, args);
+                                window->pushGui(new GuiMsgBox(window, message, _("OK")));
+                            }));
+                    }, _("CANCEL"), nullptr));
+            };
+            if (value.empty()) page->addEntry(label, false, handler);
+            else page->addWithLabel(label, gcmV3Value(window, value), false, handler);
+            any = true;
+        }
+    }
+    if (!any)
+        page->addWithLabel(_("GCM REPORT"), gcmV3Value(window, _("NOT AVAILABLE")));
     window->pushGui(page);
 }

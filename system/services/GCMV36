@@ -27,6 +27,14 @@ case "${1:-}" in
         nohup python3 -u "$BOOT" >>"$LOG" 2>&1 </dev/null &
         echo "$!" > "$PIDFILE"
 
+        # 61TN: refresh GCM's emulator registry (new emulators and add-on consoles) in the background
+        SCAN=/userdata/system/add-ons/game-content-manager/gcm-emulator-scan.py
+        INSPECT=/userdata/system/add-ons/game-content-manager/gcm-content-inspect.py
+        if [ -f "$SCAN" ]; then
+            # 61TQ: then the content inspector (updates and DLC on every drive, files GCM cannot identify)
+            nohup sh -c 'nice -n 19 python3 -B "$1" >/userdata/system/logs/gcm-emulator-scan.out 2>&1; [ -f "$2" ] && nice -n 19 python3 -B "$2" >/userdata/system/logs/gcm-content-inspect.out 2>&1' gcm-scan "$SCAN" "$INSPECT" </dev/null >/dev/null 2>&1 &
+        fi
+
         echo "GCMV36 startup worker launched"
         ;;
 
