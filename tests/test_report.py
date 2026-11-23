@@ -11,7 +11,8 @@ with tempfile.TemporaryDirectory() as t:
     (g / "emulator-registry.json").write_text(json.dumps({"scanned": "2026-11-23 10:00:00", "emulators": [
         {"system": "switch", "emulator": "citron-emu", "status": "built-in", "backend": "citron", "family": "yuzu", "evidence": ["supported by name"]},
         {"system": "switch", "emulator": "eden-emu", "status": "compatible", "backend": "citron", "family": "yuzu", "evidence": ["same storage"]},
-        {"system": "n64", "emulator": "newemu", "status": "new-console", "backend": None, "family": None, "evidence": ["GCM does not manage the n64 console yet"]},
+        {"system": "n64", "emulator": "newemu", "status": "new-console", "backend": None, "family": "yuzu", "evidence": ["GCM does not manage the n64 console yet"]},
+        {"system": "amiga", "emulator": "fsuae", "status": "new-console", "backend": None, "family": None, "evidence": ["no known family"]},
         {"system": "xbox", "emulator": "xemu", "status": "excluded", "evidence": []}]}))
     src = t / "userdata/roms/switch"; src.mkdir(parents=True); f = src / "Mystery [UPD].bin"; f.write_bytes(os.urandom(100000))
     w = t / "userdata/roms/wii"; w.mkdir(parents=True); f2 = w / "odd (DLC).wad"; f2.write_bytes(os.urandom(90000))
@@ -24,6 +25,7 @@ with tempfile.TemporaryDirectory() as t:
     check("a new console is listed first under NEEDS WORK", out.index("NEEDS WORK BEFORE") < out.index("N64 · NEWEMU") < out.index("EMULATORS (SCANNED"), out)
     check("Eden shows as handled by Citron", "SWITCH · EDEN-EMU\tSUPPORTED VIA CITRON" in out, out)
     check("excluded emulators are not listed", "XEMU" not in out)
+    check("a console without updates or DLC (no update/DLC family) is not listed", "AMIGA" not in out, out)
     check("content counts per console, with the backup drive", "ROW\tSWITCH\t1 UPDATES · 1 DLC · 1 ON A BACKUP DRIVE" in out, out)
     check("2 files GCM cannot identify", "PAGE\tNOT IDENTIFIED\t2 FILES\tFILES GCM CANNOT IDENTIFY\tmanual" in out, out)
     d = run("details", "--system", "n64", "--emulator", "newemu")

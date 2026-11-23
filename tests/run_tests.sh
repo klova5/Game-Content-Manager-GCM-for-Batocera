@@ -13,6 +13,7 @@ ADDON=$SYS/add-ons/game-content-manager
 python3 -B tests/test_emulator_scan.py "$ADDON/gcm-emulator-scan.py"
 python3 -B tests/test_content_inspect.py "$ADDON/gcm-content-inspect.py"
 python3 -B tests/test_report.py "$ADDON/gcm-report.py"
+python3 -B tests/test_manual_content.py "$ADDON/gcm-report.py"
 ROUTE="$SYS/gcm-native-test/step61-common-content/beta-switch-dlc-inplace-v02/gcm-switch-fresh-menu-v02.py"
 python3 -B tests/test_backup_drive.py "$ROUTE"
 python3 -B tests/test_content_folders.py "$ROUTE"
