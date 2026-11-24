@@ -1,11 +1,10 @@
-# GCM – Game Content Manager for Batocera (4.0 developer preview)
+# GCM – Game Content Manager for Batocera (4.1)
 
 GCM adds a **Game Content Manager** to Batocera's game menu (Advanced Game Options) and main menu. It finds,
 verifies, installs, enables and uninstalls **updates and DLC** for each game, from your internal
 storage and external drives, without touching your original files.
 
-> **Developer preview.** This is the code as it runs on the author's machine, packaged so others can
-> try it and read it. Expect rough edges, and keep backups of anything you care about.
+> Keep backups of anything you care about: GCM changes emulator content and, for Switch 2, game files.
 
 ## Supported
 
@@ -26,6 +25,22 @@ storage and external drives, without touching your original files.
   packages on internal and external drives are never deleted. Uninstalled items return to Detected.
 - **Copy to GCM** keeps a GCM-managed copy of a Switch update or DLC (optional; Switch registers in place).
 - Works with exFAT/FAT external drives (stable file identity even though those drives have no file numbers).
+
+## Changes in 4.1
+
+Release `GCM-v4.1`, for Batocera 44 stable.
+
+- **MANUAL INSTALL** on a game's UPDATES and DLC pages, for an update or DLC GCM did not detect for that game
+  (another game's or region's ID included). GCM warns first and cannot confirm the game uses it.
+  - **PS4 (shadPS4):** lists the PS4 packages and unpacked folders GCM found; installs the chosen one into the game's
+    `<GAME ID>-UPDATE` folder or `DLC/<GAME ID>/<label>` (packages are unpacked with GCM's PS4 extractor), checks every
+    file, never overwrites, and lists it as INSTALLED BY YOU with REMOVE. E.g. a US DLC for an EU game.
+  - **Switch 2 (Lichii):** copies the chosen package to GCM's Switch 2 store for this game; it is then installed from
+    the Available list like any other item. Lichii only uses content whose ID matches the game.
+- **MANUAL CONTENT for Windows games** (GAME CONTENT MANAGER page): mark files as a game, an update or DLC, pair them
+  with a game, and copy them as-is into the game's folder or another folder you pick; every copy is checked, recorded
+  and removable.
+- Consoles without updates or DLC are no longer listed as needing work.
 
 ## Changes in 4.0 developer preview 1
 
@@ -84,20 +99,20 @@ Release `GCM-v3.6-preview-3` (5.4 MB). Tested on the Batocera v44 beta of Nov 16
 
 ## Install
 
-Download `gcm-v4.0-preview-1-batocera44-x86_64.zip` from this repository's
+Download `gcm-v4.1-batocera44-x86_64.zip` from this repository's
 [Releases](https://github.com/klova5/Game-Content-Manager-GCM-for-Batocera/releases), copy it to
 `/userdata/system` on the Batocera device, then from Batocera's terminal (or an SSH session on the device):
 
 ```bash
 cd /userdata/system
-unzip gcm-v4.0-preview-1-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v4.0-preview-1-batocera44-x86_64.zip .
-cd gcm-v4.0-preview
+unzip gcm-v4.1-batocera44-x86_64.zip      # or: python3 -m zipfile -e gcm-v4.1-batocera44-x86_64.zip .
+cd gcm-v4.1
 bash install.sh --check     # only checks the device; writes nothing
 bash install.sh --start     # installs and switches to GCM (and at every boot)
 ```
 
 `bash install.sh` without `--start` installs without switching; it prints the command to switch later.
-Updating an earlier preview: `bash install.sh --replace --start` (the BUA app does this for you).
+Updating an earlier version: `bash install.sh --replace --start` (the BUA app does this for you).
 
 ## Switching frontends
 

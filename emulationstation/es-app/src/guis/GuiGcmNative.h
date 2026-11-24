@@ -2497,6 +2497,161 @@ static void gcmV62OpenUpdateRemoval(Window* window, const std::string& rom,
         }));
 }
 
+// 4.1: MANUAL INSTALL. The backend lists packages (ROW MANUAL <value> <label> <token> <warning>); choosing one
+// runs its prepare job (copy to GCM for this game) and refreshes the page.
+static void gcmV82AddManualInstall(Window* window, GuiSettings* page, const std::string& rom,
+    const std::string& emulator, const std::string& kind, const std::function<bool()>& refreshed)
+{
+    auto caption = gcmV3Value(window, _("MANUAL INSTALL"));
+    caption->setHorizontalAlignment(ALIGN_RIGHT);
+    page->addWithLabel("", caption, false, [window, rom, emulator, kind, refreshed]()
+    {
+        const std::string output = gcmV3Run(rom, emulator, "--mode manual-list --type " + gcmV3Quote(kind));
+        auto list = new GuiSettings(window, kind == "update" ? _("MANUAL INSTALL: UPDATES") : _("MANUAL INSTALL: DLC"));
+        std::istringstream lines(output);
+        std::string line;
+        bool any = false;
+        while (std::getline(lines, line))
+        {
+            std::vector<std::string> f;
+            std::istringstream fields(line);
+            std::string part;
+            while (std::getline(fields, part, '\t'))
+                f.push_back(part);
+            if (f.size() > 1 && f[0] == "ERROR")
+            {
+                list->addWithLabel(_("NOTHING TO INSTALL"), gcmV3Value(window, ""));
+                list->addWithLabel("", gcmV3Value(window, f[1]));
+                any = true;
+                continue;
+            }
+            if (f.size() < 5 || f[0] != "ROW" || f[1] != "MANUAL")
+                continue;
+            const std::string value = f[2], label = f[3], token = f[4], warning = f.size() > 5 ? f[5] : "";
+            list->addWithLabel(label, gcmV3Value(window, value), false,
+                [window, list, rom, emulator, kind, token, label, warning, refreshed]()
+                {
+                    const std::string question = std::string(_("GCM DID NOT DETECT THIS FOR THIS GAME:")) + "\n" + label
+                        + (warning.empty() ? "" : "\n\n" + warning)
+                        + "\n\n" + _("COPY IT TO GCM FOR THIS GAME? YOU THEN INSTALL IT FROM THE AVAILABLE LIST.");
+                    window->pushGui(new GuiMsgBox(window, question, _("COPY"),
+                        [window, list, rom, emulator, kind, token, refreshed]()
+                        {
+                            window->pushGui(new GuiLoading<std::string>(window, _("COPYING TO GCM..."),
+                                [rom, emulator, kind, token](IGuiLoadingHandler*)
+                                {
+                                    const std::string type = "native:prepare:" + kind + ":" + token;
+                                    std::string reply = gcmV35BatchRun(rom, emulator, "start", "", type);
+                                    if (gcmV35BatchField(reply, "STATUS") != "RUNNING")
+                                        return reply;
+                                    for (int i = 0; i < 7200; ++i)
+                                    {
+                                        std::this_thread::sleep_for(std::chrono::seconds(1));
+                                        reply = gcmV35BatchRun(rom, emulator, "status", "", type);
+                                        if (gcmV35BatchField(reply, "STATUS") != "RUNNING")
+                                            break;
+                                    }
+                                    return reply;
+                                },
+                                [window, list, refreshed](std::string reply)
+                                {
+                                    const bool ok = gcmV35BatchField(reply, "STATUS") == "PASS";
+                                    list->close();
+                                    refreshed();
+                                    window->pushGui(new GuiMsgBox(window,
+                                        ok ? _("COPIED TO GCM. INSTALL IT FROM THE AVAILABLE LIST.") : gcmV35FailureMessage(reply), _("OK")));
+                                }));
+                        }, _("CANCEL"), nullptr));
+                });
+            any = true;
+        }
+        if (!any)
+            list->addWithLabel(_("NOTHING TO INSTALL"), gcmV3Value(window, ""));
+        window->pushGui(list);
+    });
+}
+
+// 4.1: MANUAL INSTALL for PS4 (shadPS4), served by ps4/gcm-ps4-manual.py: ROW MANUAL rows install directly
+// (unpacked into the game's -UPDATE or DLC folder), ROW INSTALLED rows can be removed, ROW BLOCKED explain why not.
+static void gcmV83AddPs4Manual(Window* window, GuiSettings* page, const std::string& rom,
+    const std::string& kind, const std::function<bool()>& refreshed)
+{
+    static const std::string tool = "/userdata/system/add-ons/game-content-manager/ps4/gcm-ps4-manual.py";
+    auto caption = gcmV3Value(window, _("MANUAL INSTALL"));
+    caption->setHorizontalAlignment(ALIGN_RIGHT);
+    page->addWithLabel("", caption, false, [window, rom, kind, refreshed]()
+    {
+        const std::string output = gcmV35RunTool("python3 -B " + gcmV3Quote(tool) + " list --rom " + gcmV3Quote(rom)
+            + " --type " + gcmV3Quote(kind) + " 2>&1");
+        auto list = new GuiSettings(window, kind == "update" ? _("MANUAL INSTALL: UPDATES") : _("MANUAL INSTALL: DLC"));
+        std::istringstream lines(output);
+        std::string line;
+        bool any = false;
+        while (std::getline(lines, line))
+        {
+            std::vector<std::string> f;
+            std::istringstream fields(line);
+            std::string part;
+            while (std::getline(fields, part, '\t'))
+                f.push_back(part);
+            if (f.size() > 1 && f[0] == "ERROR")
+            {
+                list->addWithLabel(_("NOTHING TO INSTALL"), gcmV3Value(window, ""));
+                list->addWithLabel("", gcmV3Value(window, f[1]));
+                any = true;
+                continue;
+            }
+            if (f.size() < 5 || f[0] != "ROW")
+                continue;
+            const std::string state = f[1], value = f[2], label = f[3], token = f[4], note = f.size() > 5 ? f[5] : "";
+            any = true;
+            if (state == "BLOCKED")
+            {
+                list->addWithLabel(label, gcmV3Value(window, value), false,
+                    [window, note]() { window->pushGui(new GuiMsgBox(window, note, _("OK"))); });
+                continue;
+            }
+            const bool remove = state == "INSTALLED";
+            list->addWithLabel(label, gcmV3Value(window, value), false,
+                [window, list, rom, kind, token, label, note, remove, refreshed]()
+                {
+                    const std::string question = remove ? note
+                        : std::string(_("GCM DID NOT DETECT THIS FOR THIS GAME:")) + "\n" + label + "\n\n" + note
+                          + "\n\n" + _("INSTALL IT ANYWAY? GCM CANNOT CONFIRM THE GAME USES IT.");
+                    window->pushGui(new GuiMsgBox(window, question, remove ? _("REMOVE") : _("INSTALL"),
+                        [window, list, rom, kind, token, remove, refreshed]()
+                        {
+                            window->pushGui(new GuiLoading<std::string>(window, remove ? _("REMOVING...") : _("INSTALLING..."),
+                                [rom, kind, token, remove](IGuiLoadingHandler*)
+                                {
+                                    return gcmV35RunTool("python3 -B " + gcmV3Quote(tool) + (remove ? " remove" : " install")
+                                        + " --rom " + gcmV3Quote(rom) + " --type " + gcmV3Quote(kind)
+                                        + " --token " + gcmV3Quote(token) + " 2>&1");
+                                },
+                                [window, list, refreshed](std::string reply)
+                                {
+                                    std::string message = _("NO ANSWER FROM GCM");
+                                    std::istringstream r(reply);
+                                    std::string l;
+                                    while (std::getline(r, l))
+                                        if (l.rfind("OK\t", 0) == 0 || l.rfind("ERROR\t", 0) == 0)
+                                        {
+                                            message = l.substr(l.find('\t') + 1);
+                                            break;
+                                        }
+                                    list->close();
+                                    refreshed();
+                                    window->pushGui(new GuiMsgBox(window, message, _("OK")));
+                                }));
+                        }, _("CANCEL"), nullptr));
+                });
+        }
+        if (!any)
+            list->addWithLabel(_("NOTHING TO INSTALL"), gcmV3Value(window, ""));
+        window->pushGui(list);
+    });
+}
+
 static void gcmV61AddNativeScanActions(Window* window, GuiSettings* page,
     const std::string& rom, const std::string& emulator, const std::string& kind,
     const std::function<bool(const std::string&)>& refreshed)
@@ -3300,10 +3455,14 @@ static void gcmV33OpenDlcPage(
 
     if (gcmV61IsNativeFolder(emulator) || gcmV63IsExtraProvider(emulator))
         gcmV61AddNativeScanActions(window, page, rom, emulator, "dlc", [refreshAfterScan](const std::string&) { return refreshAfterScan(); });
+    if (gcmV80IsSwitch2(emulator))
+        gcmV82AddManualInstall(window, page, rom, emulator, "dlc", [refreshAfterScan]() { return refreshAfterScan(); });
     else
     gcmV34AddScanActions(
         window, page, rom, emulator, refreshAfterScan
     );
+    if (emulator == "shadps4")
+        gcmV83AddPs4Manual(window, page, rom, "dlc", [refreshAfterScan]() { return refreshAfterScan(); });
 
 
     auto minimizeToggle = std::make_shared<GcmV31ConfirmSwitch>(window);
@@ -5332,10 +5491,14 @@ static void gcmV3OpenPage(
 
     if (gcmV61IsNativeFolder(emulator) || gcmV63IsExtraProvider(emulator))
         gcmV61AddNativeScanActions(window, page, rom, emulator, type, [refreshAfterScan](const std::string&) { return refreshAfterScan(); });
+    if (gcmV80IsSwitch2(emulator))
+        gcmV82AddManualInstall(window, page, rom, emulator, type, [refreshAfterScan]() { return refreshAfterScan(); });
     else
     gcmV34AddScanActions(
         window, page, rom, emulator, refreshAfterScan
     );
+    if (emulator == "shadps4")
+        gcmV83AddPs4Manual(window, page, rom, type, [refreshAfterScan]() { return refreshAfterScan(); });
 
 
 

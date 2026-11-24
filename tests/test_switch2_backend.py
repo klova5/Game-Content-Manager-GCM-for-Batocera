@@ -109,5 +109,28 @@ with tempfile.TemporaryDirectory() as t:
     out = run("--mode", "summary", "--rom", stub, "--emulator", "citron-emu"); check("other emulators are refused", "ERROR" in out)
     spec2 = importlib.util.spec_from_file_location("b", B); BB = importlib.util.module_from_spec(spec2); spec2.loader.exec_module(BB)
     check("an update with no display version shows as Lichii does (131072 = 2.0.0)", BB.shown_version({"version": 131072}) == "2.0.0" and BB.shown_version({"version": 65536, "display_version": "1.0.1"}) == "1.0.1")
+    # MANUAL INSTALL: another game's DLC package and an update GCM's scan did not find
+    odd = t / "userdata/odd-place"; odd.mkdir()
+    dump(work / "odlc", None, {"x/y.bin": os.urandom(3000)})
+    subprocess.run([sys.executable, "-B", str(HERE / "gcm-nup.py"), "pack", work / "odlc", odd / "other-dlc.nup", "--kind", "dlc", "--title-id", "0400BBBB00011001"], capture_output=True)
+    ins = t / "userdata/system/add-ons/game-content-manager"; ins.mkdir(parents=True, exist_ok=True)
+    (ins / "content-inspection.json").write_text(json.dumps({"content": [
+        {"file": "/userdata/odd-place/other-dlc.nup", "console": "switch2", "kind": "dlc", "title_id": "0400BBBB00011001", "version": 0},
+        {"file": "/userdata/roms/switch2/Test Game [0400AAAA00010000].nup", "console": "switch2", "kind": "base", "title_id": "0400AAAA00010000", "version": 0}]}))
+    out = run("--mode", "list", "--type", "dlc", *R)
+    check("another game's DLC is not offered as detected", "other-dlc" not in out, out)
+    ml = run("--mode", "manual-list", "--type", "dlc", *R)
+    mrow = [l.split("\t") for l in ml.splitlines() if l.startswith("ROW\tMANUAL")]
+    check("MANUAL INSTALL lists it, marked ANOTHER ID, with Lichii's warning", len(mrow) == 1 and mrow[0][2] == "ANOTHER ID" and "0400BBBB00011001" in mrow[0][3] and "PROBABLY BE IGNORED" in mrow[0][5], ml)
+    out = job(*R, "--type", "dlc", "--operation", "prepare", "--tokens", mrow[0][4])
+    check("choosing it copies it to GCM's store for this game", field(out, "STATUS") == "PASS" and (store / "manual-dlc-0400BBBB00011001-v0.nup").exists(), out)
+    dl = run("--mode", "list", "--type", "dlc", *R); arow = [l.split("\t") for l in dl.splitlines() if "0400BBBB00011001" in l]
+    check("it is now AVAILABLE on this game's DLC page", len(arow) == 1 and arow[0][1] == "AVAILABLE", dl)
+    out = job(*R, "--type", "dlc", "--operation", "enable", "--tokens", arow[0][4])
+    check("and installs into this game like any other item", field(out, "STATUS") == "PASS" and any(p["title_id"] == "0400BBBB00011001" for p in N.Nup(game).describe()), out)
+    ml2 = run("--mode", "manual-list", "--type", "dlc", *R)
+    check("once installed it is no longer offered", "0400BBBB00011001" not in ml2, ml2)
+    check("the update page has nothing to offer here (ERROR line explains)", run("--mode", "manual-list", "--type", "update", *R).startswith("ERROR"))
+    check("capability MANUAL_INSTALL is reported", "CAPABILITY\tMANUAL_INSTALL\t1" in run("--mode", "capabilities", "--type", "update", *R))
     out = run("capabilities", "--emulator", "lichii"); check("uninstall capability reported", "CAPABILITY\tUNINSTALL_DLC\t1" in out)
 print("ALL SWITCH 2 BACKEND TESTS PASS" if not fails else "FAILED: %s" % fails); sys.exit(1 if fails else 0)

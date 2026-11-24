@@ -24,6 +24,7 @@ STATE = P("/userdata/system/gcm-native-test/state/switch2")
 STORE = P("/userdata/system/game-content/switch2")
 ROMS = P("/userdata/roms/switch2")
 LAUNCHER = P("/userdata/system/add-ons/switch2/eglantine/launch-eglantine.sh")
+INSPECTION = P("/userdata/system/add-ons/game-content-manager/content-inspection.json")
 SCHEMA = "GCM_SWITCH2_JOB_V1"
 OPS = ("prepare", "install", "apply", "uninstall", "enable", "disable", "recover", "forget", "scan-fast", "scan-deep", "scan-both")
 COPY_KEPT = " (GCM copy kept)"
@@ -141,7 +142,8 @@ def store_items(gid):
                 pk = describe(f)
             except Exception:
                 continue
-            if len(pk) == 1 and pk[0]["kind"] in ("update", "dlc") and belongs(gid, pk[0]["title_id"]):
+            # manual-*.nup: chosen for this game with MANUAL INSTALL, whatever its own title ID says
+            if len(pk) == 1 and pk[0]["kind"] in ("update", "dlc") and (belongs(gid, pk[0]["title_id"]) or f.name.startswith("manual-")):
                 p = pk[0]
                 out[item_id(gid, p["kind"], p["title_id"], p["version"])] = dict(p, file=str(f))
     return out
@@ -344,9 +346,14 @@ def require_stopped():
         raise ValueError("Close the game first: Lichii is running")
 
 
+def manual_index_path(s): return STATE / "index" / ("%s-%s-manual.json" % (s["game"], s["kind"]))
+
+
 def source_entry(s, token):
-    doc = read(index_path(s)) if index_path(s).exists() else {}
-    found = [c for c in doc.get("candidates", []) if c["token"] == token]
+    found = []
+    for path in (index_path(s), manual_index_path(s)):
+        doc = read(path) if path.exists() else {}
+        found += [c for c in doc.get("candidates", []) if c["token"] == token]
     if len(found) != 1:
         raise ValueError("Selection is no longer in the scan results; scan again")
     return found[0]
@@ -355,10 +362,53 @@ def source_entry(s, token):
 def store_path(gid, kind, tid, ver): return store_dir(gid) / ("%s-%s-v%d.nup" % (kind, tid, ver))
 
 
+def manual_list(s):
+    """MANUAL INSTALL: every Switch 2 update or DLC package the content inspector found that is not already
+    in this game, in GCM's store or detected for it, including packages with another game's ID. Each is
+    offered with a warning; choosing one copies it to GCM's store for this game (prepare)."""
+    try:
+        rows = json.loads(INSPECTION.read_text()).get("content", [])
+    except (OSError, ValueError):
+        rows = []
+    g = {"file": s["file"], "title_id": s["game"]}
+    known = set(game_items(g)) | set(store_items(s["game"]))
+    doc = read(index_path(s)) if index_path(s).exists() else {}
+    known |= {item_id(s["game"], c["kind"], c["title_id"], c["version"]) for c in doc.get("candidates", [])}
+    game_path = Path(s["file"]).resolve()
+    found = {}
+    for r in rows:
+        if r.get("console") != "switch2" or r.get("kind") != s["kind"] or not r.get("title_id"):
+            continue
+        src = P(r["file"])
+        if not src.exists() or src.resolve() == game_path:
+            continue
+        version = r.get("version") if isinstance(r.get("version"), int) else 0
+        how = "loose dump"
+        if src.is_file():
+            try:
+                pk = [p for p in describe(src) if p["kind"] == r["kind"] and p["title_id"] == r["title_id"] and p["version"] == version]
+            except Exception:
+                continue
+            if not pk:
+                continue
+            how = "package %d" % pk[0]["index"]
+        if item_id(s["game"], r["kind"], r["title_id"], version) in known:
+            continue
+        token = "manual:" + hashlib.sha256(("%s|%s|%s|%d|%s" % (src, r["kind"], r["title_id"], version, how)).encode()).hexdigest()
+        found[token] = {"token": token, "source": str(src), "kind": r["kind"], "title_id": r["title_id"], "version": version,
+                        "how": how, "manual": True, "matches": belongs(s["game"], r["title_id"])}
+        if len(found) >= 100:
+            break
+    atom(manual_index_path(s), {"game": s["game"], "candidates": list(found.values()), "created": time.time()})
+    return list(found.values())
+
+
 def prepare(s, token, d):
     """Copies a detected source into GCM's store as a checked single-package file."""
     c = source_entry(s, token)
     out = store_path(s["game"], c["kind"], c["title_id"], c["version"])
+    if c.get("manual"):
+        out = store_dir(s["game"]) / ("manual-%s-%s-v%d.nup" % (c["kind"], c["title_id"], c["version"]))
     if out.exists():
         return
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -681,7 +731,21 @@ def menu(args):
             elif args.type == "update":
                 state = {"ENABLED": "ACTIVE", "DISABLED": "INSTALLED"}.get(state, state)
             print("\t".join(("ROW", row["section"], state, clean(row["label"]), row["token"])))
+    elif args.mode == "manual-list":
+        found = manual_list(s)
+        if not found:
+            print("ERROR\tNo other Switch 2 %s packages were found. GCM's content inspector looks at every drive at boot; use RESCAN NOW on the GAME CONTENT MANAGER page after adding files." % ("update" if args.type == "update" else "DLC"))
+        for c in sorted(found, key=lambda c: (not c["matches"], Path(c["source"]).name)):
+            label = "%s · %s v%d" % (Path(c["source"]).name, c["title_id"], c["version"])
+            if c["matches"]:
+                value, warn = "THIS GAME'S ID", "ITS ID MATCHES THIS GAME, BUT IT WAS NOT DETECTED BY A SCAN."
+            else:
+                value = "ANOTHER ID"
+                warn = ("ITS TITLE ID %s IS NOT THIS GAME'S (%s). LICHII ONLY USES AN UPDATE OR DLC WHOSE ID MATCHES "
+                        "THE GAME, SO IT WILL PROBABLY BE IGNORED." % (c["title_id"], s["game"]))
+            print("\t".join(("ROW", "MANUAL", value, clean(label), c["token"], clean(warn))))
     elif args.mode == "capabilities":
+        print("CAPABILITY\tMANUAL_INSTALL\t1")
         print("CAPABILITY\tCOMMIT_AVAILABLE_DLC\t1")
         print("CAPABILITY\tSELECT_UPDATE\t1")
     elif args.mode == "select-update":
